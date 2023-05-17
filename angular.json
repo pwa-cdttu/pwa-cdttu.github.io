@@ -123,7 +123,7 @@
         "deploy": {
           "builder": "angular-cli-ghpages:deploy",
           "options": {
-            "baseHref": "https://cdttu.github.io"
+            "baseHref": "https://pwa-cdttu.github.io"
           }
         }
       }
