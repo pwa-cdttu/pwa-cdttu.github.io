@@ -43,15 +43,14 @@ export class AdmissionsOfficeService {
   }
 
   getStudentSettings(request?: any): Observable<any> {
-    console.log(request);
     return new Observable((observable) => {
       let querySheet = this.settingStudentSheet
-      if (request.subject && request.time) {
+      if (request?.subject && request?.time) {
         querySheet = request.subject
       }
       const studentSetting = this.admissionsOfficeWorbook.Sheets[querySheet]
       let data = this.decodeRawSheetData(studentSetting).filter((item: any) => !!item.id)
-      if (request.time) {
+      if (request?.time) {
         data = data.map((item: any) => {
           let reponseObject = <any>{}
           reponseObject['id'] = item.id
@@ -61,7 +60,7 @@ export class AdmissionsOfficeService {
           return reponseObject
         })
       }
-      if (!request.subject && !request.time) {
+      if (!request?.subject && !request?.time) {
         const ref: Mutable<this> = this;
         ref.settingStudentData = data
       }
