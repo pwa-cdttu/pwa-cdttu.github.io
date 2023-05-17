@@ -347,6 +347,8 @@ export class DiemDanhComponent implements OnInit {
   }
 
   onShowSyncDataDialog() {
+    this.isSyncInProgress = false
+    this.isSyncCheck = false
     this.matDialog.open(this.syncDataDialog, { disableClose: true })
   }
 
@@ -363,6 +365,7 @@ export class DiemDanhComponent implements OnInit {
     } catch (error) {
       console.log(error);
       this.isSyncInProgress = false;
+      this.isSyncCheck = false
     }
   }
 
