@@ -1,0 +1,91 @@
+<mat-drawer-container class="main-mat-drawer-container" autosize>
+  <mat-drawer
+    mode="side"
+    class="main-drawer mat-drawer"
+    opened
+    *ngIf="viewPortMode == 'desktop'"
+  >
+    <div class="d-flex flex-column align-items-center">
+      <button
+        class="menu-icon-mobile"
+        mat-icon-button
+        (click)="onToggleDrawer()"
+        [matTooltip]="viewMissionService.isDrawerOpened ? 'Ẩn menu' : 'Mở menu'"
+      >
+        <mat-icon>{{
+          viewMissionService.isDrawerOpened ? "menu_open" : "menu"
+        }}</mat-icon>
+      </button>
+      <mat-nav-list class="main-nav-list">
+        <a
+          *ngFor="let item of mainMenu"
+          mat-list-item
+          [disableRipple]="true"
+          [routerLink]="item.url"
+          [routerLinkActive]="'active'"
+          [matTooltip]="item.toolTip"
+        >
+          <mat-icon>{{ item.icon }}</mat-icon>
+        </a>
+      </mat-nav-list>
+    </div>
+  </mat-drawer>
+  <mat-drawer-content>
+    <div class="main-drawer-content d-flex flex-column w-100 h-100">
+      <mat-toolbar class="d-flex justify-content-between" [color]="'primary'">
+        <button
+          *ngIf="viewPortMode == 'mobile'"
+          class="menu-icon-mobile"
+          mat-icon-button
+          (click)="onToggleDrawer()"
+          [matTooltip]="
+            viewMissionService.isDrawerOpened ? 'Ẩn menu' : 'Mở menu'
+          "
+        >
+          <mat-icon>{{
+            viewMissionService.isDrawerOpened ? "menu_open" : "menu"
+          }}</mat-icon>
+        </button>
+        <a
+          [routerLink]="'/'"
+          class="logo d-flex align-items-center"
+          [matTooltip]="'Học viện Cao Đài Tiên Thiên'"
+        >
+          <img
+            src="favicon.ico"
+            alt="Học Viện Cao Đài Tiên Thiên"
+            height="36px"
+          />
+          <span *ngIf="viewPortMode == 'desktop'" class="logo-text"
+            >Học viện Cao Đài Tiên Thiên</span
+          >
+        </a>
+        <button
+          *ngIf="viewPortMode == 'mobile'"
+          mat-icon-button
+          [disabled]="true"
+        >
+          <mat-icon></mat-icon>
+        </button>
+      </mat-toolbar>
+      <div class="w-100 sub-container">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>
+
+<div class="w-100 d-flex side-nav-mobile-wrapper" *ngIf="!isHideBottomNavBar">
+  <mat-nav-list class="side-nav-mobile d-flex">
+    <a
+      *ngFor="let item of mainMenu"
+      mat-list-item
+      [disableRipple]="true"
+      [routerLink]="item?.url"
+      [routerLinkActive]="'active'"
+      [matTooltip]="item.toolTip"
+    >
+      <mat-icon>{{ item?.icon }}</mat-icon>
+    </a>
+  </mat-nav-list>
+</div>

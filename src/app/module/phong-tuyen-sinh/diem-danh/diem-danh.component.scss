@@ -1,0 +1,132 @@
+@use "../../../../sass/variables.scss";
+@use "sass:map";
+::ng-deep {
+  .diem-danh-container {
+    overflow: hidden;
+    max-height: 100%;
+    .diem-danh-content-wrapper {
+      max-height: 100%;
+      overflow: hidden;
+      .attendance {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        overflow: auto;
+        max-height: 100%;
+        scroll-behavior: smooth;
+        @media only screen and (max-width: map.get(variables.$small-361-600, "layout-region-off")) {
+          display: block;
+        }
+        .attendance-control {
+          width: 100%;
+          &.sticky-mode {
+            position: sticky;
+            top: 0;
+          }
+          @media only screen and (max-width: map.get(variables.$small-361-600, "layout-region-off")) {
+            position: relative;
+          }
+          .checked-in-setting {
+            &-wrapper {
+              border: 1px solid #dadce0;
+              border-radius: 0.5rem;
+              &.selected {
+                color: map.get(variables.$light-theme, "main-background");
+                font-weight: bold;
+                border: 1px solid
+                  map.get(variables.$light-theme, "main-background");
+                .mat-grid-tile-header {
+                  font-weight: normal;
+                  background-color: map.get(
+                    variables.$light-theme,
+                    "main-background"
+                  );
+                }
+              }
+            }
+            &-data {
+              font-size: 24px;
+              line-height: normal;
+              text-align: center;
+            }
+          }
+          .mat-expansion-panel-header {
+            &.selected {
+              * {
+                color: map.get(variables.$light-theme, "main-background");
+              }
+            }
+          }
+        }
+        .attendance-table {
+          min-width: 50%;
+          max-width: 50%;
+          padding-left: 1rem;
+          @media only screen and (max-width: map.get(variables.$small-361-600, "layout-region-off")) {
+            min-width: 100%;
+            max-width: 100%;
+          }
+          table {
+            border-spacing: 0;
+            td,
+            th {
+              text-align: center;
+              border-bottom: 1px solid #0000001f;
+              padding: 0.5rem;
+              @media only screen and (max-width: map.get(variables.$small-361-600, "layout-region-off")) {
+                padding: 0.5rem 0;
+              }
+              &.mat-sort-header-sorted {
+                color: black;
+              }
+            }
+            thead {
+              position: sticky;
+              top: 0;
+              background-color: #ffffff;
+            }
+            tbody {
+              tr {
+                &:nth-child(2n + 2) {
+                  background-color: #ffffff;
+                }
+                &.checkedIn {
+                  background: #34a853;
+                  * {
+                    color: #ffffff;
+                  }
+                }
+              }
+            }
+          }
+          mat-divider {
+            margin-top: 1rem;
+          }
+        }
+      }
+    }
+  }
+  .module-name {
+    mat-icon {
+      margin-right: 1rem;
+    }
+  }
+  .checkedIn {
+    background: #34a853;
+    * {
+      color: #ffffff;
+    }
+  }
+}
+.mat-dialog-welcome-attendance {
+  h1,
+  .welcomeIcon {
+    line-height: normal;
+  }
+  .welcomeIcon {
+    font-size: 200px;
+    @media only screen and (max-width: map.get(variables.$small-361-600, "layout-region-off")) {
+      font-size: 100px;
+    }
+  }
+}

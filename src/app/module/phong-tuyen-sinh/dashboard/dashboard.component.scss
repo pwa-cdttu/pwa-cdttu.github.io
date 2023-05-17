@@ -1,0 +1,84 @@
+@use "../../../../sass/variables.scss";
+@use "sass:map";
+::ng-deep {
+  .module-name {
+    mat-icon {
+      margin-right: 1rem;
+    }
+  }
+  .feature {
+    &-wrapper {
+      border: 1px solid #dadce0;
+      border-radius: 0.5rem;
+    }
+  }
+  .filter-box {
+    position: sticky;
+    top: 0;
+  }
+  .table-wrapper {
+    overflow: auto;
+    max-height: 600px;
+  }
+}
+
+table {
+  width: 100%;
+  border-spacing: 0;
+}
+
+tr.example-detail-row {
+  height: 0;
+}
+
+tr.example-element-row:not(.example-expanded-row):hover {
+  background: whitesmoke;
+}
+
+tr.example-element-row:not(.example-expanded-row):active {
+  background: #efefef;
+}
+
+.example-element-row td {
+  border-bottom-width: 0;
+}
+
+.example-element-detail {
+  overflow: hidden;
+  display: flex;
+}
+
+.example-element-diagram {
+  min-width: 80px;
+  border: 2px solid black;
+  padding: 1rem;
+  font-weight: lighter;
+  margin: 1rem 0;
+}
+
+.example-element-symbol {
+  font-weight: bold;
+  font-size: 40px;
+  line-height: normal;
+}
+
+.example-element-description {
+  padding: 1rem;
+}
+
+.example-element-qr {
+  padding: 1rem;
+}
+
+.example-element-description-attribution {
+  opacity: 0.5;
+}
+
+.qrSave {
+  text-align: center;
+  padding: 1rem;
+  border: 2px solid black;
+  p {
+    margin: 0;
+  }
+}

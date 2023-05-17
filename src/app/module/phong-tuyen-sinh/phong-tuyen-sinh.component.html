@@ -1,0 +1,56 @@
+<mat-drawer-container class="main-mat-drawer-container" autosize>
+  <mat-drawer
+    mode="side"
+    class="sub-sidenav mat-drawer"
+    [opened]="viewMissionService.isDrawerOpened"
+  >
+    <mat-nav-list class="main-nav-list">
+      <div
+        [routerLink]="'.'"
+        class="module-name d-flex align-items-center container-fluid"
+      >
+        <mat-icon>support_agent</mat-icon>
+        <h2>Phòng tuyển sinh</h2>
+      </div>
+      <a
+        *ngFor="let item of menu"
+        mat-list-item
+        [disableRipple]="true"
+        [routerLink]="item.url"
+        [routerLinkActive]="'active'"
+        [matTooltip]="item.toolTip"
+        (click)="onToggleDrawer()"
+      >
+        <div class="d-flex align-items-center">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span class="menu-label">{{ item.label }}</span>
+        </div>
+      </a>
+    </mat-nav-list>
+  </mat-drawer>
+  <mat-drawer-content>
+    <div class="loading" *ngIf="!isActiveAdmissionOffice">
+      <div class="animation">
+        <mat-icon
+          [ngStyle]="{
+            fontSize: viewPortMode == 'desktop' ? '200px' : '50px',
+            height: viewPortMode == 'desktop' ? '200px' : '50px',
+            width: viewPortMode == 'desktop' ? '200px' : '50px'
+          }"
+          >support_agent</mat-icon
+        >
+        <div
+          class="text"
+          [ngStyle]="{
+            fontSize: viewPortMode == 'desktop' ? '50px' : '20px'
+          }"
+        >
+          Phòng tuyển sinh
+        </div>
+      </div>
+    </div>
+    <ng-container *ngIf="isActiveAdmissionOffice">
+      <router-outlet></router-outlet>
+    </ng-container>
+  </mat-drawer-content>
+</mat-drawer-container>

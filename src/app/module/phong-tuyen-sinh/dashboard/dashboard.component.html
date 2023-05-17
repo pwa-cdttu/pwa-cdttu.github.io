@@ -1,0 +1,181 @@
+<div class="container-fluid wrapper-container diem-danh-container">
+  <div class="w-100 d-flex justify-content-between align-items-center">
+    <div class="module-name d-flex align-items-center container-fluid">
+      <mat-icon>support_agent</mat-icon>
+      <h1>Phòng tuyển sinh</h1>
+    </div>
+  </div>
+
+  <div class="flex-1 diem-danh-content-wrapper">
+    <mat-accordion>
+      <mat-expansion-panel class="w-100" [expanded]="true">
+        <mat-expansion-panel-header>Chức năng</mat-expansion-panel-header>
+        <div>
+          <mat-grid-list
+            [cols]="viewPortMode == 'desktop' ? 5 : 1"
+            [gutterSize]="'10px'"
+            [routerLink]="'diem-danh'"
+          >
+            <mat-grid-tile class="feature-wrapper cursor-pointer">
+              Điểm danh
+            </mat-grid-tile>
+          </mat-grid-list>
+        </div>
+      </mat-expansion-panel>
+      <mat-expansion-panel class="w-100" [expanded]="true">
+        <mat-expansion-panel-header
+          >Danh sách học viên</mat-expansion-panel-header
+        >
+        <div>
+          <mat-form-field class="w-100">
+            <mat-label>Tìm kiếm học viên theo Mã, Tên, năm sinh</mat-label>
+            <input
+              matInput
+              (keyup)="applyFilter($event)"
+              placeholder="Tìm kiếm học viên theo Mã, Tên, năm sinh"
+              #input
+            />
+          </mat-form-field>
+          <div class="table-wrapper">
+            <table
+              mat-table
+              [dataSource]="dataSource"
+              multiTemplateDataRows
+              class="mat-elevation-z8"
+            >
+              <ng-container
+                matColumnDef="{{ column }}"
+                *ngFor="let column of columnsToDisplay"
+                sticky
+              >
+                <th mat-header-cell *matHeaderCellDef>
+                  {{
+                    column == "id"
+                      ? "Mã học viên"
+                      : column == "na"
+                      ? "Họ và Tên"
+                      : column == "bi"
+                      ? "Năm sinh"
+                      : ""
+                  }}
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element[column] }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="expand" sticky>
+                <th mat-header-cell *matHeaderCellDef aria-label="row actions">
+                  &nbsp;
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  <button
+                    mat-icon-button
+                    aria-label="expand row"
+                    (click)="
+                      onExpand(element, $event); $event.stopPropagation()
+                    "
+                  >
+                    <mat-icon *ngIf="expandedElement !== element"
+                      >keyboard_arrow_down</mat-icon
+                    >
+                    <mat-icon *ngIf="expandedElement === element"
+                      >keyboard_arrow_up</mat-icon
+                    >
+                  </button>
+                </td>
+              </ng-container>
+
+              <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+              <ng-container matColumnDef="expandedDetail">
+                <td
+                  mat-cell
+                  *matCellDef="let element"
+                  [attr.colspan]="columnsToDisplayWithExpand.length"
+                >
+                  <div
+                    class="example-element-detail"
+                    [@detailExpand]="
+                      element == expandedElement ? 'expanded' : 'collapsed'
+                    "
+                  >
+                    <div class="example-element-diagram">
+                      <div class="example-element-position">
+                        {{ element.id }}
+                      </div>
+                      <div class="example-element-symbol">{{ element.na }}</div>
+                      <div class="example-element-name">
+                        Năm sinh: {{ element.bi }}
+                      </div>
+                    </div>
+                    <div class="example-element-qr" *ngIf="element['qr']">
+                      <div #qrSave class="qrSave" [id]="'QR' + element['id']">
+                        <qrcode
+                          #parent
+                          [qrdata]="element['qr']"
+                          [width]="300"
+                          [imageHeight]="75"
+                          [imageWidth]="75"
+                          [cssClass]="'text-center'"
+                          [errorCorrectionLevel]="'M'"
+                          [colorDark]="'#000000ff'"
+                          [colorLight]="'#ffffffff'"
+                          [elementType]="'canvas'"
+                          [margin]="4"
+                          [scale]="1080"
+                          [imageSrc]="'assets/icons/cdttu.ico'"
+                        ></qrcode>
+                        <p>
+                          {{ element.id }} | {{ element?.na }} |
+                          {{ element.bi }}
+                        </p>
+                      </div>
+                      <button
+                        mat-flat-button
+                        (click)="downloading = true; saveAsImage(element)"
+                        class="w-100"
+                        #downloadButton
+                        [disabled]="downloading"
+                        [color]="'primary'"
+                      >
+                        <div
+                          class="d-flex align-items-center justify-content-center"
+                        >
+                          <mat-spinner
+                            [diameter]="20"
+                            *ngIf="downloading"
+                          ></mat-spinner>
+                          <mat-icon *ngIf="!downloading">download</mat-icon>
+                          {{
+                            downloading
+                              ? "Đang tạo hình ảnh có mã QR"
+                              : "Lưu xuống"
+                          }}
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </ng-container>
+              <tr
+                mat-header-row
+                *matHeaderRowDef="columnsToDisplayWithExpand; sticky: true"
+              ></tr>
+              <tr
+                mat-row
+                *matRowDef="let element; columns: columnsToDisplayWithExpand"
+                class="example-element-row"
+                [class.example-expanded-row]="expandedElement === element"
+                (click)="onExpand(element, $event)"
+              ></tr>
+              <tr
+                mat-row
+                *matRowDef="let row; columns: ['expandedDetail']"
+                class="example-detail-row"
+              ></tr>
+            </table>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+</div>
