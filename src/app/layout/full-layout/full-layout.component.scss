@@ -43,8 +43,7 @@
     &.side-nav-mobile {
       display: flex !important;
       width: 100%;
-      padding-top: 12px;
-      padding-bottom: 16px;
+      padding: 0;
       border-top: solid 1px
         map.get(variables.$light-theme, "inverse-on-surface");
       justify-content: space-between;
@@ -81,6 +80,12 @@
       }
       &:hover::before {
         background-color: transparent;
+      }
+      &.active {
+        background-color: #ffffff;
+        * {
+          color: map.get(variables.$light-theme, "main-background");
+        }
       }
     }
   }
