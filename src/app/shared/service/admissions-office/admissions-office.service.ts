@@ -359,6 +359,12 @@ export class AdmissionsOfficeService {
               });
               subjectRemoteData.forEach((d: any, index: any) => {
                 const rowKeys = Object.keys(d)
+                const date = rowKeys.filter((rk: any) => parseInt(rk));
+                date.forEach((da: any) => {
+                  if (parseInt(da) > 0) {
+                    d['co'] += 1
+                  }
+                })
                 const dataRow = saveLogTimeSheet.addRow(rowKeys.map((key: any) => d[key]));
                 fitWidth(dataRow, config)
               })
@@ -392,9 +398,6 @@ export class AdmissionsOfficeService {
                 ]
               })
             }
-          }
-          const applyData = () => {
-
           }
           if (subjectRemote) {
             subjectRemoteData = this.decodeRawSheetData(subjectRemote)
