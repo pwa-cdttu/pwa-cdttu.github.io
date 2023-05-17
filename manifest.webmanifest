@@ -4,8 +4,8 @@
   "theme_color": "#1976d2",
   "background_color": "#fafafa",
   "display": "standalone",
-  "scope": "https://cdttu.github.io",
-  "start_url": "https://cdttu.github.io",
+  "scope": "https://pwa-cdttu.github.io",
+  "start_url": "https://pwa-cdttu.github.io",
   "icons": [
     {
       "src": "assets/icons/windows11/SmallTile.scale-100.png",
