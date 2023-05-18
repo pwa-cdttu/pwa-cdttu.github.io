@@ -1,6 +1,6 @@
 {
-  "name": "cdttu.github.io",
-  "short_name": "cdttu.github.io",
+  "name": "pwa.cdttu.github.io",
+  "short_name": "pwa.cdttu.github.io",
   "theme_color": "#1976d2",
   "background_color": "#fafafa",
   "display": "standalone",
