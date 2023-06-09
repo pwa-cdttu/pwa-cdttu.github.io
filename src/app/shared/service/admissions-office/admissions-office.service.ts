@@ -80,7 +80,7 @@ export class AdmissionsOfficeService {
         if (!parseFloat(returnData['v'])) {
           return returnData['v']
         } else {
-          return new Date(returnData['w']).getTime()
+          return new Date(returnData['v']).toString() !== 'Invalid Date' ? returnData['v'] : new Date(returnData['w']).getTime()
         }
       }
     }))]?.filter((col: any) => !!col)
