@@ -61,7 +61,7 @@
   }
   .side-nav-mobile-wrapper {
     display: none;
-    position: fixed;
+    position: sticky;
     bottom: 0;
     z-index: 1;
     * {
