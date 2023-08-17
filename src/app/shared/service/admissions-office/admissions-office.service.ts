@@ -80,7 +80,15 @@ export class AdmissionsOfficeService {
         if (!parseFloat(returnData['v'])) {
           return returnData['v']
         } else {
-          return new Date(returnData['v']).toString() !== 'Invalid Date' ? returnData['v'] : new Date(returnData['w']).getTime()
+          let dateValue = new Date(returnData['v'])
+          if (dateValue.toString() == 'Invalid Date') {
+            const date = returnData['v'].split(/(.\d{2}\/)/)[0]
+            const month = returnData['v'].split(/(.\d{2}\/)/)[1]?.replaceAll('/', '')
+            const year = returnData['v'].split(' ')[0].split('/')[returnData['v'].split(' ')[0].split('/')?.length - 1]
+            const time = returnData['v'].split(' ')[1]
+            dateValue = new Date(`${year}-${month}-${date} ${time}`)
+          }
+          return dateValue.getTime()
         }
       }
     }))]?.filter((col: any) => !!col)
@@ -116,9 +124,9 @@ export class AdmissionsOfficeService {
           reduce((cur, key) => { return Object.assign(cur, { [key]: new Date(subject[key]['v']).toString() != 'Invalid Date' ? subject[key]['v'] :  subject[key]['w'] }) }, {})
           const subjectArray = Object.keys(objectKey).map((item: any) => {
             let dateValue = new Date(objectKey[item])
-            if (parseInt(item)) {
-              const month = objectKey[item].split(/(.\d{2}\/)/)[0]
-              const date = objectKey[item].split(/(.\d{2}\/)/)[1]?.replaceAll('/', '')
+            if (dateValue.toString() == 'Invalid Date') {
+              const date = objectKey[item].split(/(.\d{2}\/)/)[0]
+              const month = objectKey[item].split(/(.\d{2}\/)/)[1]?.replaceAll('/', '')
               const year = objectKey[item].split(' ')[0].split('/')[objectKey[item].split(' ')[0].split('/')?.length - 1]
               const time = objectKey[item].split(' ')[1]
               dateValue = new Date(`${year}-${month}-${date} ${time}`)
@@ -289,10 +297,18 @@ export class AdmissionsOfficeService {
             const foundSubject = localStorageAttendance.find((item: any) => item.subject == ms)
             if (foundSubject) {
               const logTimes = Object.keys(foundSubject).filter((fj: any, index: any) => fj !== 'subject' && fj !== 'name')
-              logTimes.forEach((lt: any) => {
-                foundSubject[lt].forEach((fslt: any) => {
-                  const localFoundRemoteByid = subjectRemoteData.find((rs: any) => rs.id == fslt.id)
-                  subjectRemoteData[subjectRemoteData.indexOf(localFoundRemoteByid)][lt] = fslt.checkedIn
+              subjectRemoteData.forEach((std: any, index: any) => {
+                logTimes.forEach((lt: any) => {
+                  foundSubject[lt].forEach((fslt: any) => {
+                    const localFoundRemoteByid = subjectRemoteData.find((rs: any) => rs.id == fslt.id)
+                    if (std.id && index === subjectRemoteData.indexOf(localFoundRemoteByid)) {
+                      subjectRemoteData[subjectRemoteData.indexOf(localFoundRemoteByid)][lt] = fslt.checkedIn
+                    } else {
+                      if (std.id && !subjectRemoteData[index][lt]) {
+                        subjectRemoteData[index][lt] = 0
+                      }
+                    }
+                  })
                 })
               })
             }
@@ -316,6 +332,8 @@ export class AdmissionsOfficeService {
                 if (currentSubject) {
                   remoteKeys = remoteKeys = remoteKeys.concat(Object.keys(currentSubject).filter((csok: any) => csok !== 'subject' && csok !== 'name').map((fcsok: any) => {
                     const dateValue = new Date(parseInt(fcsok))
+                    console.log(this.datePipe.transform(dateValue, 'dd/MM/YYYY HH:mm:ss'));
+
                     return dateValue.toString() != 'Invalid Date' ? this.datePipe.transform(dateValue, 'dd/MM/YYYY HH:mm:ss') : undefined;
                   })?.filter((item: any) => !!item))
                   rowKeys = remoteKeys.map((item: any) => {
@@ -328,6 +346,8 @@ export class AdmissionsOfficeService {
                 if (currentSubject) {
                   remoteKeys = remoteKeys.concat(Object.keys(currentSubject).filter((csok: any) => csok !== 'subject' && csok !== 'name').map((fcsok: any) => {
                     const dateValue = new Date(parseInt(fcsok))
+                    console.log(this.datePipe.transform(dateValue, 'dd/MM/YYYY HH:mm:ss'));
+
                     return dateValue.toString() != 'Invalid Date' ? this.datePipe.transform(dateValue, 'dd/MM/YYYY HH:mm:ss') : undefined;
                   })?.filter((item: any) => !!item))
                   rowKeys = remoteKeys.map((item: any) => {
@@ -374,10 +394,13 @@ export class AdmissionsOfficeService {
                 }
               });
               subjectRemoteData.forEach((d: any, index: any) => {
+                if (d['id']) {
+                  d['co'] = 0
+                }
                 const rowKeys = Object.keys(d)
                 const date = rowKeys.filter((rk: any) => parseInt(rk));
                 date.forEach((da: any) => {
-                  if (parseInt(da) > 0) {
+                  if (parseInt(d[da]) > 0) {
                     d['co'] += 1
                   }
                 })
@@ -413,6 +436,7 @@ export class AdmissionsOfficeService {
                   }
                 ]
               })
+              console.log(subjectRemoteData);
             }
           }
           if (subjectRemote) {
@@ -431,7 +455,6 @@ export class AdmissionsOfficeService {
             handleLocalData()
           }
         })
-
       }
       getStudentSettingSheet()
       // Generate Excel File with given name

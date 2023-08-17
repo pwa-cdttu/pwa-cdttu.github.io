@@ -84,6 +84,8 @@ export class DiemDanhComponent implements OnInit {
                 }
               }
             })
+            console.log(this.subjectList);
+
             if (this.subjectList.length == 1) {
               this.checkInSession['subject'] = this.subjectList[0]['id']
               this.getCheckInTimeList()
@@ -148,6 +150,8 @@ export class DiemDanhComponent implements OnInit {
               }
             }
             this.studentSettings = data
+            console.log(this.studentSettings);
+
             this.count = {
               checkedIn: this.studentSettings?.filter((item: any) => item?.checkedIn > 0)?.length,
               total: this.studentSettings?.length
