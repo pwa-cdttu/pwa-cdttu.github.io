@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "firebase-deploy": "ng deploy --dry-run --base-href=https://cdttu-pwa.web.app && cd dist/cdttu.github.io && copy index.html 404.html && firebase deploy && cd .. && cd .. && git add . && git commit -m deploy && git push"
   },
   "private": true,
   "dependencies": {
