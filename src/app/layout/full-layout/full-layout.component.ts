@@ -1,8 +1,9 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ApplicationRef, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ViewMissionService } from 'src/app/shared/service/view-mission/view-mission.service';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SwUpdate, SwPush } from '@angular/service-worker';
+import { interval } from 'rxjs';
 
 @Component({
   selector: 'app-full-layout',
@@ -30,6 +31,7 @@ export class FullLayoutComponent implements OnInit {
     private router: Router,
     private swUpdate: SwUpdate,
     private swPush: SwPush,
+    private appRef: ApplicationRef,
     private breakpointObserver: BreakpointObserver
   ) {
     router.events.subscribe((val: any) => {
@@ -68,6 +70,7 @@ export class FullLayoutComponent implements OnInit {
           }
         }
       });
+    this.autoCheckForUpdate();
     this.onUpdateVersion();
   }
 
@@ -88,6 +91,22 @@ export class FullLayoutComponent implements OnInit {
     });
     this.swUpdate.activated.subscribe((event: any) => {
       console.log(`current`, event.previous, `available`, event.current);
+    });
+  }
+
+  autoCheckForUpdate() {
+    this.appRef.isStable.subscribe((isStable: any) => {
+      if (!isStable) {
+        const timeInterval = interval(8 * 60 * 60 * 1000);
+        // const timeInterval = interval(2000);
+        timeInterval.subscribe(() => {
+          this.swUpdate.checkForUpdate().then(() => {
+            console.log('auto check for update');
+            this.onUpdateVersion();
+            location.reload();
+          });
+        });
+      }
     });
   }
 
