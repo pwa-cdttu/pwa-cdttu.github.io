@@ -332,8 +332,6 @@ export class AdmissionsOfficeService {
                 if (currentSubject) {
                   remoteKeys = remoteKeys = remoteKeys.concat(Object.keys(currentSubject).filter((csok: any) => csok !== 'subject' && csok !== 'name').map((fcsok: any) => {
                     const dateValue = new Date(parseInt(fcsok))
-                    console.log(this.datePipe.transform(dateValue, 'dd/MM/YYYY HH:mm:ss'));
-
                     return dateValue.toString() != 'Invalid Date' ? this.datePipe.transform(dateValue, 'dd/MM/YYYY HH:mm:ss') : undefined;
                   })?.filter((item: any) => !!item))
                   rowKeys = remoteKeys.map((item: any) => {
@@ -346,8 +344,6 @@ export class AdmissionsOfficeService {
                 if (currentSubject) {
                   remoteKeys = remoteKeys.concat(Object.keys(currentSubject).filter((csok: any) => csok !== 'subject' && csok !== 'name').map((fcsok: any) => {
                     const dateValue = new Date(parseInt(fcsok))
-                    console.log(this.datePipe.transform(dateValue, 'dd/MM/YYYY HH:mm:ss'));
-
                     return dateValue.toString() != 'Invalid Date' ? this.datePipe.transform(dateValue, 'dd/MM/YYYY HH:mm:ss') : undefined;
                   })?.filter((item: any) => !!item))
                   rowKeys = remoteKeys.map((item: any) => {
@@ -436,7 +432,6 @@ export class AdmissionsOfficeService {
                   }
                 ]
               })
-              console.log(subjectRemoteData);
             }
           }
           if (subjectRemote) {
