@@ -121,16 +121,16 @@ export class AdmissionsOfficeService {
       if (subject) {
         const objectKey = <any>Object.keys(subject).
           filter((key) => /^[a-zA-Z]*2[a-zA-Z\\s-]*$/.test(key)).
-          reduce((cur, key) => { return Object.assign(cur, { [key]: new Date(subject[key]['v']).toString() != 'Invalid Date' ? subject[key]['v'] :  subject[key]['w'] }) }, {})
-          const subjectArray = Object.keys(objectKey).map((item: any) => {
-            let dateValue = new Date(objectKey[item])
-            if (dateValue.toString() == 'Invalid Date') {
-              const date = objectKey[item].split(/(.\d{2}\/)/)[0]
-              const month = objectKey[item].split(/(.\d{2}\/)/)[1]?.replaceAll('/', '')
-              const year = objectKey[item].split(' ')[0].split('/')[objectKey[item].split(' ')[0].split('/')?.length - 1]
-              const time = objectKey[item].split(' ')[1]
-              dateValue = new Date(`${year}-${month}-${date} ${time}`)
-            }
+          reduce((cur, key) => { return Object.assign(cur, { [key]: new Date(subject[key]['v']).toString() != 'Invalid Date' ? subject[key]['v'] : subject[key]['w'] }) }, {})
+        const subjectArray = Object.keys(objectKey).map((item: any) => {
+          let dateValue = new Date(objectKey[item])
+          if (dateValue.toString() == 'Invalid Date') {
+            const date = objectKey[item].split(/(.\d{2}\/)/)[0]
+            const month = objectKey[item].split(/(.\d{2}\/)/)[1]?.replaceAll('/', '')
+            const year = objectKey[item].split(' ')[0].split('/')[objectKey[item].split(' ')[0].split('/')?.length - 1]
+            const time = objectKey[item].split(' ')[1]
+            dateValue = new Date(`${year}-${month}-${date} ${time}`)
+          }
           return dateValue.toString() != 'Invalid Date' ? dateValue.getTime() : undefined;
         })?.filter((item: any) => !!item)
         response = {
@@ -284,7 +284,7 @@ export class AdmissionsOfficeService {
         const localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
         const mergeSubjects = [...new Set(localStorageAttendance.map((lsa: any) => lsa.subject).concat(remoteSubjects))]
         mergeSubjects.forEach((ms: any) => {
-          const saveLogTimeSheet = admissionsOfficeExportedWorbook.addWorksheet(ms);
+          let saveLogTimeSheet = admissionsOfficeExportedWorbook.addWorksheet(ms);
           saveLogTimeSheet.views = [{
             state: 'frozen',
             ySplit: 2,
@@ -313,47 +313,38 @@ export class AdmissionsOfficeService {
               })
             }
             if (subjectRemoteData[0]) {
-              let remoteKeys = Object.keys(subjectRemoteData[0])?.map((srk: any) => parseInt(srk) ? undefined : srk).filter((srk: any) => !!srk)
+              let remoteKeys = Object.keys(subjectRemoteData[0])?.map((srk: any) => srk).filter((srk: any) => !!srk)
               let rowKeys = <any>[]
               if (subjectRemote) {
-                const objectKey = <any>Object.keys(subjectRemote).
-                  filter((key) => /^[a-zA-Z]*2[a-zA-Z\\s-]*$/.test(key)).
-                  reduce((cur, key) => { return Object.assign(cur, { [key]: subjectRemote[key]['w'] }) }, {})
-                const subjectTimes = Object.keys(objectKey).map((item: any) => {
-                  const dateValue = new Date(objectKey[item])
-                  return dateValue.toString() != 'Invalid Date' ? dateValue.getTime() : undefined;
-                })?.filter((item: any) => !!item)
-                remoteKeys = remoteKeys.concat(subjectTimes.map((st: any) => this.datePipe.transform(st, 'dd/MM/YYYY HH:mm:ss')))
-                rowKeys = remoteKeys.map((item: any) => {
-                  const dataValue = new Date(item)
-                  return dataValue.toString() !== 'Invalid Date' ? dataValue.getTime() : item
-                })
+
                 const currentSubject = localStorageAttendance.find((lcs: any) => lcs.subject == ms)
                 if (currentSubject) {
-                  remoteKeys = remoteKeys = remoteKeys.concat(Object.keys(currentSubject).filter((csok: any) => csok !== 'subject' && csok !== 'name').map((fcsok: any) => {
-                    const dateValue = new Date(parseInt(fcsok))
-                    return dateValue.toString() != 'Invalid Date' ? this.datePipe.transform(dateValue, 'dd/MM/YYYY HH:mm:ss') : undefined;
-                  })?.filter((item: any) => !!item))
-                  rowKeys = remoteKeys.map((item: any) => {
-                    const dataValue = new Date(item)
-                    return dataValue.toString() !== 'Invalid Date' ? dataValue.getTime() : item
-                  })
+                  remoteKeys = [...new Set(remoteKeys = remoteKeys.concat(Object.keys(currentSubject).filter((csok: any) => csok !== 'subject' && csok !== 'name').map((fcsok: any) => {
+                    return fcsok
+                  })?.filter((item: any) => !!item)))]
+                  rowKeys = [...new Set(remoteKeys.map((item: any) => {
+                    return item
+                  }))]
                 }
               } else {
                 const currentSubject = localStorageAttendance.find((lcs: any) => lcs.subject == ms)
                 if (currentSubject) {
-                  remoteKeys = remoteKeys.concat(Object.keys(currentSubject).filter((csok: any) => csok !== 'subject' && csok !== 'name').map((fcsok: any) => {
-                    const dateValue = new Date(parseInt(fcsok))
-                    return dateValue.toString() != 'Invalid Date' ? this.datePipe.transform(dateValue, 'dd/MM/YYYY HH:mm:ss') : undefined;
-                  })?.filter((item: any) => !!item))
-                  rowKeys = remoteKeys.map((item: any) => {
-                    const dataValue = new Date(item)
-                    return dataValue.toString() !== 'Invalid Date' ? dataValue.getTime() : item
-                  })
+                  remoteKeys = [...new Set(remoteKeys.concat(Object.keys(currentSubject).filter((csok: any) => csok !== 'subject' && csok !== 'name').map((fcsok: any) => {
+                    return fcsok
+                  })?.filter((item: any) => !!item)))]
+                  rowKeys = [...new Set(remoteKeys.map((item: any) => {
+                    return item
+                  }))]
                 }
               }
+              remoteKeys = remoteKeys.map((rmks: any) => {
+                return new Date(parseInt(rmks)).toString() == 'Invalid Date' ? rmks : this.datePipe.transform(new Date(parseInt(rmks)), 'dd/MM/YYYY HH:mm:ss')
+              })
+              rowKeys = rowKeys.map((rmks: any) => {
+                return new Date(parseInt(rmks)).toString() == 'Invalid Date' ? rmks : this.datePipe.transform(new Date(parseInt(rmks)), 'dd/MM/YYYY HH:mm:ss')
+              })
               const subjectHeaderRow = saveLogTimeSheet.addRow(remoteKeys);
-              const subjectHeaderRowKey = saveLogTimeSheet.addRow(rowKeys.map((item: any) => this.settingStudentHeader[item]?.name ? this.settingStudentHeader[item]?.name : item));
+              const subjectHeaderRowKey = saveLogTimeSheet.addRow(remoteKeys.map((item: any) => this.settingStudentHeader[item]?.name ? this.settingStudentHeader[item]?.name : item));
               let config = remoteKeys.map(() => 20)
               subjectHeaderRow.eachCell((cell, number) => {
                 cell.fill = {
@@ -432,6 +423,8 @@ export class AdmissionsOfficeService {
                   }
                 ]
               })
+              console.log(remoteKeys);
+              console.log(rowKeys);
             }
           }
           if (subjectRemote) {
