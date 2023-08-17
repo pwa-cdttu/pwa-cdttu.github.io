@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ViewMissionService } from 'src/app/shared/service/view-mission/view-mission.service';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SwUpdate, SwPush } from '@angular/service-worker';
 
 @Component({
   selector: 'app-full-layout',
@@ -27,6 +28,8 @@ export class FullLayoutComponent implements OnInit {
     private cd: ChangeDetectorRef,
     private route: ActivatedRoute,
     private router: Router,
+    private swUpdate: SwUpdate,
+    private swPush: SwPush,
     private breakpointObserver: BreakpointObserver
   ) {
     router.events.subscribe((val: any) => {
@@ -65,6 +68,27 @@ export class FullLayoutComponent implements OnInit {
           }
         }
       });
+    this.onUpdateVersion();
+  }
+
+  onUpdateVersion() {
+    if (!this.swUpdate.isEnabled) {
+      console.log('Not enable to update');
+      return;
+    }
+    this.swUpdate.available.subscribe((event: any) => {
+      console.log(`current`, event.current, `available`, event.available);
+      if (
+        confirm(
+          'Phiên bản mới đã sẵn sàng, hãy đồng ý để cập nhật phiên bản mới ngay!!'
+        )
+      ) {
+        this.swUpdate.activateUpdate().then(() => location.reload());
+      }
+    });
+    this.swUpdate.activated.subscribe((event: any) => {
+      console.log(`current`, event.previous, `available`, event.current);
+    });
   }
 
   onToggleDrawer() {
