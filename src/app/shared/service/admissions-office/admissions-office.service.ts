@@ -50,20 +50,6 @@ export class AdmissionsOfficeService {
       }
       let studentSetting = this.admissionsOfficeWorbook.Sheets[querySheet]
       let data = this.decodeRawSheetData(studentSetting).filter((item: any) => !!item.id)
-      if (request?.time) {
-        data = data.map((item: any) => {
-          let reponseObject = <any>{}
-          reponseObject['id'] = item.id
-          reponseObject['na'] = item.na
-          reponseObject['bi'] = item.bi
-          reponseObject['checkedIn'] = item[request.time]
-          return reponseObject
-        })
-      }
-      if (!request?.subject && !request?.time) {
-        const ref: Mutable<this> = this;
-        ref.settingStudentData = data
-      }
       if (data?.length === 0) {
         studentSetting = this.admissionsOfficeWorbook.Sheets[this.settingStudentSheet]
         data = this.decodeRawSheetData(studentSetting).filter((item: any) => !!item.id)
