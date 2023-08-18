@@ -48,8 +48,26 @@ export class AdmissionsOfficeService {
       if (request?.subject && request?.time) {
         querySheet = request.subject
       }
-      const studentSetting = this.admissionsOfficeWorbook.Sheets[querySheet]
+      let studentSetting = this.admissionsOfficeWorbook.Sheets[querySheet]
       let data = this.decodeRawSheetData(studentSetting).filter((item: any) => !!item.id)
+      if (request?.time) {
+        data = data.map((item: any) => {
+          let reponseObject = <any>{}
+          reponseObject['id'] = item.id
+          reponseObject['na'] = item.na
+          reponseObject['bi'] = item.bi
+          reponseObject['checkedIn'] = item[request.time]
+          return reponseObject
+        })
+      }
+      if (!request?.subject && !request?.time) {
+        const ref: Mutable<this> = this;
+        ref.settingStudentData = data
+      }
+      if (data?.length === 0) {
+        studentSetting = this.admissionsOfficeWorbook.Sheets[this.settingStudentSheet]
+        data = this.decodeRawSheetData(studentSetting).filter((item: any) => !!item.id)
+      }
       if (request?.time) {
         data = data.map((item: any) => {
           let reponseObject = <any>{}
@@ -74,28 +92,31 @@ export class AdmissionsOfficeService {
   }
 
   private decodeRawSheetData(data: any, header?: any) {
-    const column = [...new Set(Object.keys(data).map((col: any) => {
-      let returnData = data[col.replace(/\d+((.|,)\d+)?/, '2')]
-      if (returnData) {
-        if (!parseFloat(returnData['v'])) {
-          return returnData['v']
-        } else {
-          let dateValue = new Date(returnData['v'])
-          if (dateValue.toString() == 'Invalid Date') {
-            const date = returnData['v'].split(/(.\d{2}\/)/)[0]
-            const month = returnData['v'].split(/(.\d{2}\/)/)[1]?.replaceAll('/', '')
-            const year = returnData['v'].split(' ')[0].split('/')[returnData['v'].split(' ')[0].split('/')?.length - 1]
-            const time = returnData['v'].split(' ')[1]
-            dateValue = new Date(`${year}-${month}-${date} ${time}`)
+    if (!!data) {
+      const column = [...new Set(Object.keys(data).map((col: any) => {
+        let returnData = data[col.replace(/\d+((.|,)\d+)?/, '2')]
+        if (returnData) {
+          if (!parseFloat(returnData['v'])) {
+            return returnData['v']
+          } else {
+            let dateValue = new Date(returnData['v'])
+            if (dateValue.toString() == 'Invalid Date') {
+              const date = returnData['v'].split(/(.\d{2}\/)/)[0]
+              const month = returnData['v'].split(/(.\d{2}\/)/)[1]?.replaceAll('/', '')
+              const year = returnData['v'].split(' ')[0].split('/')[returnData['v'].split(' ')[0].split('/')?.length - 1]
+              const time = returnData['v'].split(' ')[1]
+              dateValue = new Date(`${year}-${month}-${date} ${time}`)
+            }
+            return dateValue.getTime()
           }
-          return dateValue.getTime()
         }
-      }
-    }))]?.filter((col: any) => !!col)
-    const responseData = utils.sheet_to_json<any>(data, {
-      header: header || column
-    })?.slice(2);
-    return responseData
+      }))]?.filter((col: any) => !!col)
+      const responseData = utils.sheet_to_json<any>(data, {
+        header: header || column
+      })?.slice(2);
+      return responseData
+    }
+    return []
   }
 
   getSubject(): Observable<any> {
@@ -423,8 +444,6 @@ export class AdmissionsOfficeService {
                   }
                 ]
               })
-              console.log(remoteKeys);
-              console.log(rowKeys);
             }
           }
           if (subjectRemote) {
