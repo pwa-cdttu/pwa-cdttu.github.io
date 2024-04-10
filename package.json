@@ -38,6 +38,7 @@
     "ng2-charts": "^4.1.1",
     "ngx-capture": "^0.13.0",
     "ngx-mat-timepicker": "^15.1.7",
+    "ngx-scanner-qrcode": "^1.6.4",
     "path": "^0.12.7",
     "rxjs": "~7.4.0",
     "tslib": "^2.3.0",

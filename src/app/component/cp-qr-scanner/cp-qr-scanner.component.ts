@@ -19,7 +19,7 @@ export class CpQrScannerComponent implements AfterViewInit, OnDestroy {
     // decode: 'macintosh',
     // deviceActive: 0, // camera front: deviceActive=0  // back camera: deviceActive=1
     constraints: {
-      facingMode: "environment", // 'user' (front camera), and 'environment' (back camera).
+      // facingMode: "environment", // 'user' (front camera), and 'environment' (back camera).
       audio: false,
       video: {
         width: window.innerWidth // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
