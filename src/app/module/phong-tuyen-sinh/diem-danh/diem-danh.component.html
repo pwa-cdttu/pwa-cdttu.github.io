@@ -2,11 +2,9 @@
   <div class="w-100 d-flex justify-content-between align-items-center">
     <div class="module-name d-flex align-items-center container-fluid">
       <mat-icon>rule</mat-icon>
-      <h1>
+      <h1 class="text-5xl my-5">
         Điểm danh
-        <span *ngIf="count?.checkedIn"
-          >{{ count.checkedIn }}/{{ count.total }}</span
-        >
+        <span *ngIf="count?.checkedIn">{{ count.checkedIn }}/{{ count.total }}</span>
       </h1>
     </div>
     <button mat-icon-button [matMenuTriggerFor]="actionMenu">
@@ -26,115 +24,79 @@
   </div>
   <div class="flex-1 diem-danh-content-wrapper">
     <div class="attendance" id="diemDanhWrapper">
-      <div
-        class="attendance-control"
-        [ngClass]="{
+      <div class="attendance-control" [ngClass]="{
           'sticky-mode': checkInSession.subject && checkInSession.time
-        }"
-      >
+        }">
         <mat-expansion-panel class="w-100" [expanded]="!checkInSession.time">
-          <mat-expansion-panel-header
-            [ngClass]="{ selected: !!checkInSession['subject'] }"
-          >
+          <mat-expansion-panel-header [ngClass]="{ selected: !!checkInSession['subject'] }">
             <mat-panel-title> Môn học </mat-panel-title>
             <mat-panel-description>
               {{
-                !!checkInSession.subject
-                  ? "Đã chọn " + checkInSession.subject
-                  : "Ấn chọn một môn học cho phiên điểm danh này"
+              !!checkInSession.subject
+              ? "Đã chọn " + checkInSession.subject
+              : "Ấn chọn một môn học cho phiên điểm danh này"
               }}
             </mat-panel-description>
           </mat-expansion-panel-header>
           <div>
-            <mat-grid-list
-              [cols]="viewPortMode == 'desktop' ? 3 : 1"
-              [gutterSize]="'10px'"
-            >
-              <mat-grid-tile
-                *ngFor="let item of subjectList"
-                class="checked-in-setting-wrapper cursor-pointer"
-                (click)="onUpdateCheckInSession({ subject: item })"
-                [ngClass]="{
+            <mat-grid-list [cols]="viewPortMode == 'desktop' ? 3 : 1" [gutterSize]="'10px'">
+              <mat-grid-tile *ngFor="let item of subjectList" class="checked-in-setting-wrapper cursor-pointer"
+                (click)="onUpdateCheckInSession({ subject: item })" [ngClass]="{
                   selected: checkInSession['subject'] == item.id
-                }"
-              >
+                }">
                 <mat-grid-tile-header>{{ item?.id }}</mat-grid-tile-header>
                 <span class="checked-in-setting-data">{{ item?.na }}</span>
               </mat-grid-tile>
-              <mat-grid-tile
-                class="checked-in-setting-wrapper cursor-pointer"
-                (click)="onUpdateCheckInSession({ subject: 'addNew' })"
-              >
+              <mat-grid-tile class="checked-in-setting-wrapper cursor-pointer"
+                (click)="onUpdateCheckInSession({ subject: 'addNew' })">
                 <mat-grid-tile-header>Thêm mới</mat-grid-tile-header>
-                <mat-icon
-                  [ngStyle]="{
+                <mat-icon [ngStyle]="{
                     fontSize: '50px',
                     height: '50px',
                     width: '50px'
-                  }"
-                  >add</mat-icon
-                >
+                  }">add</mat-icon>
               </mat-grid-tile>
             </mat-grid-list>
           </div>
         </mat-expansion-panel>
-        <mat-expansion-panel
-          class="w-100"
-          [disabled]="!checkInSession.subject"
-          [expanded]="checkInSession.subject && !checkInSession.time"
-        >
-          <mat-expansion-panel-header
-            [ngClass]="{ selected: !!checkInSession['time'] }"
-          >
+        <mat-expansion-panel class="w-100" [disabled]="!checkInSession.subject"
+          [expanded]="checkInSession.subject && !checkInSession.time">
+          <mat-expansion-panel-header [ngClass]="{ selected: !!checkInSession['time'] }">
             <mat-panel-title> Thời gian học </mat-panel-title>
             <mat-panel-description>
               {{
-                !!checkInSession.time
-                  ? "Đã chọn " +
-                    (checkInSession.time | date : "dd/MM/YYYY HH:mm:ss")
-                  : "Ấn chọn thời gian bắt đầu cho phiên điểm danh này"
+              !!checkInSession.time
+              ? "Đã chọn " +
+              (checkInSession.time | date : "dd/MM/YYYY HH:mm:ss")
+              : "Ấn chọn thời gian bắt đầu cho phiên điểm danh này"
               }}
             </mat-panel-description>
           </mat-expansion-panel-header>
           <div>
-            <mat-grid-list
-              [cols]="viewPortMode == 'desktop' ? 3 : 1"
-              [gutterSize]="'10px'"
-            >
-              <mat-grid-tile
-                *ngFor="let item of checkInTimeList"
-                class="checked-in-setting-wrapper cursor-pointer"
+            <mat-grid-list [cols]="viewPortMode == 'desktop' ? 3 : 1" [gutterSize]="'10px'">
+              <mat-grid-tile *ngFor="let item of checkInTimeList" class="checked-in-setting-wrapper cursor-pointer"
                 (click)="onUpdateCheckInSession({ time: item })"
-                [ngClass]="{ selected: checkInSession['time'] == item }"
-              >
+                [ngClass]="{ selected: checkInSession['time'] == item }">
                 <mat-grid-tile-header>{{ item }}</mat-grid-tile-header>
-                <span class="checked-in-setting-data"
-                  >Ngày {{ item | date : "dd" }} tháng
+                <span class="checked-in-setting-data">Ngày {{ item | date : "dd" }} tháng
                   {{ item | date : "MM" }} năm {{ item | date : "YYYY" }}
                   {{ item | date : "HH" }} giờ {{ item | date : "mm" }} phút
                 </span>
               </mat-grid-tile>
-              <mat-grid-tile
-                class="checked-in-setting-wrapper cursor-pointer"
-                (click)="onUpdateCheckInSession({ time: 'addNew' })"
-              >
+              <mat-grid-tile class="checked-in-setting-wrapper cursor-pointer"
+                (click)="onUpdateCheckInSession({ time: 'addNew' })">
                 <mat-grid-tile-header>Thêm mới</mat-grid-tile-header>
-                <mat-icon
-                  [ngStyle]="{
+                <mat-icon [ngStyle]="{
                     fontSize: '50px',
                     height: '50px',
                     width: '50px'
-                  }"
-                  >add</mat-icon
-                >
+                  }">add</mat-icon>
               </mat-grid-tile>
             </mat-grid-list>
           </div>
         </mat-expansion-panel>
-        <mat-expansion-panel
-          [disabled]="!checkInSession.subject || !checkInSession.time"
-          [expanded]="checkInSession.subject && checkInSession.time"
-        >
+        <mat-expansion-panel [disabled]="!checkInSession.subject || !checkInSession.time"
+          [expanded]="checkInSession.subject && checkInSession.time">
           <mat-expansion-panel-header>
             <mat-panel-title> Quét mã QR </mat-panel-title>
             <mat-panel-description>
@@ -150,30 +112,29 @@
         </div>
         <div *ngIf="!studentSetingGetting">
           <table class="w-100" *ngIf="viewPortMode == 'desktop'">
-            <thead>
+            <thead class="z-10">
               <tr>
+                <th></th>
                 <th>Mã học viên</th>
                 <th>Họ và Tên</th>
                 <th>Năm sinh</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
-              <tr
-                *ngFor="let item of studentSettings"
-                [id]="item.id"
-                [ngClass]="{ checkedIn: item.checkedIn > 0 }"
-              >
+              <tr *ngFor="let item of studentSettings" [id]="item.id" [ngClass]="{ checkedIn: item.checkedIn > 0 }">
+                <td>
+                  <mat-checkbox [(ngModel)]="item.checked" (change)="onCheckIn(item)"></mat-checkbox>
+                </td>
                 <td>{{ item?.id }}</td>
                 <td>{{ item?.na }}</td>
                 <td>{{ item?.bi }}</td>
+                <td>{{ item?.checkedIn ? (item?.checkedIn | date: 'dd/MM/YYYY hh:mm:ss') : '' }}</td>
               </tr>
             </tbody>
           </table>
           <mat-list *ngIf="viewPortMode == 'mobile'">
-            <mat-list-item
-              *ngFor="let item of studentSettings"
-              [ngClass]="{ checkedIn: item.checkedIn > 0 }"
-            >
+            <mat-list-item *ngFor="let item of studentSettings" [ngClass]="{ checkedIn: item.checkedIn > 0 }">
               <span matListItemTitle>{{ item?.na }}</span>
               <span matListItemLine>{{ item?.id }}</span>
               <span matListItemLine>{{ item?.bi }}</span>
@@ -213,12 +174,7 @@
   </mat-dialog-content>
   <mat-dialog-actions>
     <button mat-flat-button [mat-dialog-close]="true">Hủy</button>
-    <button
-      mat-flat-button
-      [mat-dialog-close]="true"
-      [color]="'warn'"
-      (click)="confirmDelete()"
-    >
+    <button mat-flat-button [mat-dialog-close]="true" [color]="'warn'" (click)="confirmDelete()">
       Tiếp tục
     </button>
   </mat-dialog-actions>
@@ -229,23 +185,13 @@
     <ng-container *ngIf="addNew?.type?.key == 'subject'">
       <mat-form-field>
         <mat-label>Mã {{ addNew?.type?.name }}</mat-label>
-        <input
-          type="text"
-          matInput
-          [(ngModel)]="addNew.key"
-          [placeholder]="'Nhập mã ' + addNew?.type?.name"
-          [required]="true"
-        />
+        <input type="text" matInput [(ngModel)]="addNew.key" [placeholder]="'Nhập mã ' + addNew?.type?.name"
+          [required]="true" />
       </mat-form-field>
       <mat-form-field>
         <mat-label>Tên {{ addNew?.type?.name }}</mat-label>
-        <input
-          type="text"
-          matInput
-          [(ngModel)]="addNew.value"
-          [placeholder]="'Nhập tên ' + addNew?.type?.name"
-          [required]="true"
-        />
+        <input type="text" matInput [(ngModel)]="addNew.value" [placeholder]="'Nhập tên ' + addNew?.type?.name"
+          [required]="true" />
       </mat-form-field>
     </ng-container>
     <ng-container *ngIf="addNew?.type?.key == 'time'">
@@ -253,22 +199,13 @@
         <mat-label>Chọn ngày</mat-label>
         <input matInput [matDatepicker]="picker" [(ngModel)]="addNew.key" />
         <mat-hint>ngày/tháng/năm</mat-hint>
-        <mat-datepicker-toggle
-          matIconSuffix
-          [for]="picker"
-        ></mat-datepicker-toggle>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
       </mat-form-field>
       <mat-form-field>
         <mat-label>Chọn giờ</mat-label>
-        <input
-          matInput
-          [(ngModel)]="addNew.value"
-          [ngxMatTimepicker]="pickerA"
-          placeholder="14:00 PM"
-          [format]="24"
-          readonly
-        />
+        <input matInput [(ngModel)]="addNew.value" [ngxMatTimepicker]="pickerA" placeholder="14:00 PM" [format]="24"
+          readonly />
         <mat-icon matSuffix (click)="pickerA.open()"> watch_later </mat-icon>
       </mat-form-field>
       <ngx-mat-timepicker #pickerA></ngx-mat-timepicker>
@@ -276,13 +213,8 @@
   </mat-dialog-content>
   <mat-dialog-actions>
     <button mat-flat-button [mat-dialog-close]="true">Hủy</button>
-    <button
-      mat-flat-button
-      [mat-dialog-close]="true"
-      [disabled]="!addNew?.key || !addNew?.value"
-      [color]="'primary'"
-      (click)="storeNewSubject()"
-    >
+    <button mat-flat-button [mat-dialog-close]="true" [disabled]="!addNew?.key || !addNew?.value" [color]="'primary'"
+      (click)="storeNewSubject()">
       Thêm
     </button>
   </mat-dialog-actions>
@@ -301,10 +233,7 @@
       <div>
         <h3>Hướng dẫn đồng bộ dữ liệu</h3>
         <p>Sau khi ấn nút đồng bộ dữ liệu:</p>
-        <img
-          src="/assets/img/guide/admissionOffice/click-sync-menu.png"
-          alt="click-sync-menu"
-        />
+        <img src="/assets/img/guide/admissionOffice/click-sync-menu.png" alt="click-sync-menu" />
         <p>
           Hãy đợi trong giây lát để hệ thống hoạt động và tạo ra file excel đồng
           bộ, quá trình này sẽ tốn vài giây cho đến tối đa là 1 phút.
@@ -315,10 +244,7 @@
           sẻ với bạn. <br />
           Thư mục dùng để đồng bộ thường có dạn như ảnh dưới đây:
         </p>
-        <img
-          src="/assets/img/guide/admissionOffice/google-drive-folder.png"
-          alt="click-sync-menu"
-        />
+        <img src="/assets/img/guide/admissionOffice/google-drive-folder.png" alt="click-sync-menu" />
         <p>
           Vị trí thường được chọn là:
           <code>/CDTTU_SYSTEM/PWA/PHÒNG TUYỂN SINH/BAN CÔNG TÁC SINH VIÊN/</code>
@@ -328,27 +254,18 @@
           <code>admissionOffice(1).xlsx</code> Thì bạn chọn file
           <code>admissionOffice.xlsx</code>
         </p>
-        <img
-          src="/assets/img/guide/admissionOffice/save.png"
-          alt="click-sync-menu"
-        />
+        <img src="/assets/img/guide/admissionOffice/save.png" alt="click-sync-menu" />
         <p>
           Một hộp thoại yêu cầu chấp nhận lưu file sẽ hiện lên. bạn chọn
           <strong>Yes</strong> để đồng ý.
         </p>
-        <img
-          src="/assets/img/guide/admissionOffice/confirm.png"
-          alt="click-sync-menu"
-        />
+        <img src="/assets/img/guide/admissionOffice/confirm.png" alt="click-sync-menu" />
         <p>
           Sau khi đồng ý cho việc đồng bộ file (trong điều kiện có kết nối
           mạng), file hệ thống vừa tạo ra sẽ đồng bộ với file được lưu trên
           Google Drive. Vậy là quá trình đồng bộ đã hoàn thành.
         </p>
-        <img
-          src="/assets/img/guide/admissionOffice/confirm.png"
-          alt="click-sync-menu"
-        />
+        <img src="/assets/img/guide/admissionOffice/confirm.png" alt="click-sync-menu" />
         <p>
           <strong>
             Hãy kiểm tra lại kết quả đồng bộ của bạn trên file Google Drive sau
@@ -357,19 +274,14 @@
         </p>
       </div>
     </mat-expansion-panel>
-    <div
-      *ngIf="isSyncInProgress"
-      class="w-100 h-100 d-flex justify-content-center align-items-center flex-column"
-    >
+    <div *ngIf="isSyncInProgress" class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
       <mat-spinner></mat-spinner>
       <div class="text-center">
         Hệ thống đang tạo file đồng bộ dữ liệu, xin đợi trong giây lát!
       </div>
     </div>
     <mat-expansion-panel [expanded]="isSyncCheck" [disabled]="true">
-      <mat-expansion-panel-header
-        >Kiểm tra lại thao tác đồng bộ</mat-expansion-panel-header
-      >
+      <mat-expansion-panel-header>Kiểm tra lại thao tác đồng bộ</mat-expansion-panel-header>
       <div>
         <h3>Hãy kiểm tra lại thao tác đồng bộ bạn đã làm đúng hay chưa nhé!</h3>
         <p>
@@ -378,16 +290,10 @@
           tác mà bạn đã thực hiện:
         </p>
         <mat-selection-list #confirm>
-          <mat-list-option
-            >Đã lưu file mà hệ thống tạo ra với tên
-            <code>admissionOffice.xlsx</code></mat-list-option
-          >
-          <mat-list-option
-            >Đã lưu file mà hệ thống tạo ra tại
-            <code
-              >/CDTTU/CDTTU/CDU/PHÒNG TUYỂN SINH/BAN CÔNG TÁC SINH VIÊN/</code
-            ></mat-list-option
-          >
+          <mat-list-option>Đã lưu file mà hệ thống tạo ra với tên
+            <code>admissionOffice.xlsx</code></mat-list-option>
+          <mat-list-option>Đã lưu file mà hệ thống tạo ra tại
+            <code>/CDTTU/CDTTU/CDU/PHÒNG TUYỂN SINH/BAN CÔNG TÁC SINH VIÊN/</code></mat-list-option>
         </mat-selection-list>
       </div>
     </mat-expansion-panel>
@@ -420,30 +326,14 @@
     </ul>
   </mat-dialog-content>
   <mat-dialog-actions>
-    <button
-      mat-flat-button
-      matDialogClose="true"
-      *ngIf="!isSyncCheck"
-      [disabled]="isSyncInProgress"
-    >
+    <button mat-flat-button matDialogClose="true" *ngIf="!isSyncCheck" [disabled]="isSyncInProgress">
       Hủy
     </button>
-    <button
-      mat-flat-button
-      [color]="'primary'"
-      (click)="syncData()"
-      *ngIf="!isSyncCheck"
-      [disabled]="isSyncInProgress"
-    >
+    <button mat-flat-button [color]="'primary'" (click)="syncData()" *ngIf="!isSyncCheck" [disabled]="isSyncInProgress">
       Đồng bộ
     </button>
-    <button
-      mat-flat-button
-      [color]="'primary'"
-      matDialogClose="true"
-      *ngIf="isSyncCheck"
-      [disabled]="confirm.selectedOptions.selected.length < 2"
-    >
+    <button mat-flat-button [color]="'primary'" matDialogClose="true" *ngIf="isSyncCheck"
+      [disabled]="confirm.selectedOptions.selected.length < 2">
       Hoàn thành
     </button>
   </mat-dialog-actions>

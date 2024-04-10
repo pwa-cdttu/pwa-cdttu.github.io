@@ -144,6 +144,9 @@ export class DiemDanhComponent implements OnInit {
                 foundAttendance.forEach((fa: any) => {
                   const foundIndex = data.indexOf(data.find((item: any) => item.id == fa.id))
                   data[foundIndex]['checkedIn'] = fa.checkedIn
+                  if (data[foundIndex]['checkedIn'] > 0) {
+                    data[foundIndex]['checked'] = true
+                  }
                 })
               }
             }
@@ -205,36 +208,40 @@ export class DiemDanhComponent implements OnInit {
       this.isDuplicate = false
       this.cd.detectChanges()
       this.welcomeDialogRef?.close();
-      this.welcomeDialogRef = this.matDialog.open(this.welcomeDialog)
-      const getRandomWelcomeIcon = () => {
-        const icon = ["👋", "😉", "🤗", "🙌"]
-        const getRandomIntInclusive = (min: any, max: any) => {
-          min = Math.ceil(min);
-          max = Math.floor(max);
-          return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
+      if (this.journeyUser.id && this.journeyUser.bi && this.journeyUser.na) {
+        this.welcomeDialogRef = this.matDialog.open(this.welcomeDialog)
+        const getRandomWelcomeIcon = () => {
+          const icon = ["👋", "😉", "🤗", "🙌"]
+          const getRandomIntInclusive = (min: any, max: any) => {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
+          }
+          return icon[getRandomIntInclusive(0, icon.length - 1)];
         }
-        return icon[getRandomIntInclusive(0, icon.length - 1)];
+        this.welcomeIcon = getRandomWelcomeIcon()
+        this.welcomeDialogRef?.afterOpened().subscribe(() => {
+          setTimeout(() => {
+            this.welcomeDialogRef?.close();
+            this.welcomeDialogRef?.close();
+            this.journeyUser = null
+          }, this.timeout)
+        })
       }
-      this.welcomeIcon = getRandomWelcomeIcon()
-      this.welcomeDialogRef?.afterOpened().subscribe(() => {
-        setTimeout(() => {
-          this.welcomeDialogRef?.close();
-          this.welcomeDialogRef?.close();
-          this.journeyUser = null
-        }, this.timeout)
-      })
     } else {
-      this.welcomeDialogRef?.close();
-      this.welcomeIcon = "🤔"
-      this.isDuplicate = true
-      this.welcomeDialogRef = this.matDialog.open(this.welcomeDialog)
-      this.welcomeDialogRef?.afterOpened().subscribe(() => {
-        setTimeout(() => {
-          this.welcomeDialogRef?.close();
-          this.welcomeDialogRef?.close();
-          this.journeyUser = null
-        }, this.timeout)
-      })
+      if (this.journeyUser.id && this.journeyUser.bi && this.journeyUser.na) {
+        this.welcomeDialogRef?.close();
+        this.welcomeIcon = "🤔"
+        this.isDuplicate = true
+        this.welcomeDialogRef = this.matDialog.open(this.welcomeDialog)
+        this.welcomeDialogRef?.afterOpened().subscribe(() => {
+          setTimeout(() => {
+            this.welcomeDialogRef?.close();
+            this.welcomeDialogRef?.close();
+            this.journeyUser = null
+          }, this.timeout)
+        })
+      }
     }
     if (this.viewPortMode == 'desktop') {
       const scannedUser = document.getElementById(this.journeyUser.id)
@@ -243,7 +250,9 @@ export class DiemDanhComponent implements OnInit {
         const foundData = this.studentSettings.find((item: any) => item.id == this.journeyUser.id)
         const foundIndex = this.studentSettings.indexOf(foundData)
         this.studentSettings[foundIndex]['checkedIn'] = Date.now()
-        diemDanhWrapper.scroll({ top: scannedUser.offsetTop - 36 })
+        if (this.journeyUser.id && this.journeyUser.bi && this.journeyUser.na) {
+          diemDanhWrapper.scroll({ top: scannedUser.offsetTop - 36 })
+        }
       }
     }
     this.storeToLocalStorage()
@@ -399,5 +408,18 @@ export class DiemDanhComponent implements OnInit {
       this.checkInTimeList.push(newTimeLog)
     }
     localStorage.setItem('attendance', JSON.stringify(localStorageAttendance))
+  }
+
+  onCheckIn(item: any) {
+    this.journeyUser = <any>{};
+    if (item?.checked) {
+      this.journeyUser.id = item?.id
+      this.storeAttendance()
+    } else {
+      if (this.studentSettings.find((is: any) => is.id === item?.id)) {
+        this.studentSettings.find((is: any) => is.id === item?.id).checkedIn = 0
+        this.storeToLocalStorage()
+      }
+    }
   }
 }
