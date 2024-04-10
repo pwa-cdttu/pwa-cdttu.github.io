@@ -79,7 +79,7 @@ export class FullLayoutComponent implements OnInit {
       console.log('Not enable to update');
       return;
     }
-    this.swUpdate.available.subscribe((event: any) => {
+    this.swUpdate.versionUpdates.subscribe((event: any) => {
       console.log(`current`, event.current, `available`, event.available);
       if (
         confirm(
@@ -89,7 +89,7 @@ export class FullLayoutComponent implements OnInit {
         this.swUpdate.activateUpdate().then(() => location.reload());
       }
     });
-    this.swUpdate.activated.subscribe((event: any) => {
+    this.swUpdate.versionUpdates.subscribe((event: any) => {
       console.log(`current`, event.previous, `available`, event.current);
     });
   }
