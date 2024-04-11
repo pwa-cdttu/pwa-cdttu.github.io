@@ -107,7 +107,7 @@
           </mat-expansion-panel-header>
           <cp-qr-scanner (qrData)="scanComplete($event)"></cp-qr-scanner>
         </mat-expansion-panel>
-        <mat-expansion-panel>
+        <mat-expansion-panel [disabled]="!checkInSession.subject || !checkInSession.time">
           <mat-expansion-panel-header>
             <mat-panel-title>Từ file</mat-panel-title>
             <mat-panel-description>Lấy dữ liệu từ file điểm danh của Zoom</mat-panel-description>
