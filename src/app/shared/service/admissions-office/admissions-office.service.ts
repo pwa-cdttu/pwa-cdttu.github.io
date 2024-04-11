@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, observable } from 'rxjs';
 import { read, utils } from 'xlsx';
 import { Workbook } from 'exceljs';
 import * as fs from 'file-saver';
@@ -61,6 +61,7 @@ export class AdmissionsOfficeService {
           reponseObject['na'] = item.na
           reponseObject['bi'] = item.bi
           reponseObject['checkedIn'] = item[request.time]
+          reponseObject['checked'] = item[request.time] > 0 ? true : false
           return reponseObject
         })
       }
@@ -77,18 +78,24 @@ export class AdmissionsOfficeService {
     })
   }
 
-  private decodeRawSheetData(data: any, header?: any) {
+  private decodeRawSheetData(data: any, option?: any) {
     if (!!data) {
       const column = [...new Set(Object.keys(data).map((col: any) => {
-        let returnData = data[col.replace(/\d+((.|,)\d+)?/, '2')]
+        let returnData = data[col.replace(/\d+((.|,)\d+)?/, (option?.row || '2'))]
         if (returnData) {
           if (!parseFloat(returnData['v'])) {
             return returnData['v']
           } else {
             let dateValue = new Date(returnData['v'])
             if (dateValue.toString() == 'Invalid Date') {
-              const date = returnData['v'].split(/(.\d{2}\/)/)[0]
-              const month = returnData['v'].split(/(.\d{2}\/)/)[1]?.replaceAll('/', '')
+              let date = returnData['v'].split(/(.\d{2}\/)/)[0]
+              if (option?.row) {
+                date = returnData['v'].split(new RegExp('/(.\d{' + option?.row + '}\/)/'))[0]
+              }
+              let month = returnData['v'].split(/(.\d{2}\/)/)[1]?.replaceAll('/', '')
+              if (option?.row) {
+                month = returnData['v'].split(new RegExp('/(.\d{' + option?.row + '}\/)/'))[1]?.replaceAll('/', '')
+              }
               const year = returnData['v'].split(' ')[0].split('/')[returnData['v'].split(' ')[0].split('/')?.length - 1]
               const time = returnData['v'].split(' ')[1]
               dateValue = new Date(`${year}-${month}-${date} ${time}`)
@@ -98,7 +105,7 @@ export class AdmissionsOfficeService {
         }
       }))]?.filter((col: any) => !!col)
       const responseData = utils.sheet_to_json<any>(data, {
-        header: header || column
+        header: option?.header || column
       })?.slice(2);
       return responseData
     }
@@ -460,6 +467,30 @@ export class AdmissionsOfficeService {
         observable.next(response)
         observable.complete()
       });
+    })
+  }
+
+  migrateFromFile(file: any): Observable<any> {
+    return new Observable((observable) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const workbook = read(e.target?.result, {
+          type: 'binary'
+        })
+        const rawData = workbook?.Sheets[workbook?.SheetNames[0]]
+        const data = this.decodeRawSheetData(rawData, { row: 1 })
+        if (data?.length > 0) {
+          observable.next({
+            code: data?.length > 0 ? 200 : 404,
+            data: data,
+          })
+          observable.complete()
+        }
+      }
+      reader.onerror = (ex) => {
+        console.log(ex);
+      }
+      reader.readAsBinaryString(file);
     })
   }
 }

@@ -150,7 +150,7 @@ export class DiemDanhComponent implements OnInit {
                 })
               }
             }
-            this.studentSettings = data
+            this.studentSettings = data           
             this.count = {
               checkedIn: this.studentSettings?.filter((item: any) => item?.checkedIn > 0)?.length,
               total: this.studentSettings?.length
@@ -201,7 +201,7 @@ export class DiemDanhComponent implements OnInit {
     }
   }
 
-  storeAttendance() {
+  storeAttendance(time?: any) {
     this.welcomeDialogRef?.close();
     const foundData = this.studentSettings?.find((item: any) => item?.id === this.journeyUser?.id).checkedIn
     if (!foundData) {
@@ -249,7 +249,7 @@ export class DiemDanhComponent implements OnInit {
       if (diemDanhWrapper && scannedUser) {
         const foundData = this.studentSettings.find((item: any) => item.id == this.journeyUser.id)
         const foundIndex = this.studentSettings.indexOf(foundData)
-        this.studentSettings[foundIndex]['checkedIn'] = Date.now()
+        this.studentSettings[foundIndex]['checkedIn'] = time || Date.now()
         if (this.journeyUser.id && this.journeyUser.bi && this.journeyUser.na) {
           diemDanhWrapper.scroll({ top: scannedUser.offsetTop - 36 })
         }
@@ -410,16 +410,96 @@ export class DiemDanhComponent implements OnInit {
     localStorage.setItem('attendance', JSON.stringify(localStorageAttendance))
   }
 
-  onCheckIn(item: any) {
+  onCheckIn(item: any, time?: any) {
     this.journeyUser = <any>{};
     if (item?.checked) {
       this.journeyUser.id = item?.id
-      this.storeAttendance()
+      this.storeAttendance(time)
     } else {
       if (this.studentSettings.find((is: any) => is.id === item?.id)) {
         this.studentSettings.find((is: any) => is.id === item?.id).checkedIn = 0
         this.storeToLocalStorage()
       }
     }
+  }
+
+  continueMessage: any;
+  isContinue: any;
+  migrateData: any;
+  onFileChange(event: any) {
+    this.continueMessage = null
+    this.isContinue = false
+    try {
+      this.admissionsOfficeService.migrateFromFile(event?.target?.files[0])
+        .subscribe((res: any) => {
+          if (res.code === 200) {
+            this.isContinue = true
+            this.migrateData = res.data
+            this.continueMessage = `Đã lọc ra file có ${res.data?.length} dòng dữ liệu.\nHãy ấn bắt đầu để tiến hành cập nhật dữ liệu điểm danh.`
+          } else {
+            this.continueMessage = 'File không khả dụng hoặc bạn đã chọ sai file, hãy chọn lại hoặc liên hệ với nhân viên để yêu cầu hỗ trợ.'
+          }
+        })
+    } catch (err) {
+      console.log(err);
+      this.continueMessage = 'File không khả dụng hoặc bạn đã chọ sai file, hãy chọn lại hoặc liên hệ với nhân viên để yêu cầu hỗ trợ.'
+    }
+  }
+
+  mintime: number = 60;
+  checkingIn: any = false
+  inValidNames = <any>[]
+  multipleNames = <any>[]
+  underMin = <any>[]
+  logedCount = 0
+  onStartMigrate() {
+    this.logedCount = 0
+    this.inValidNames = []
+    this.multipleNames = []
+    this.checkingIn = true;
+    const timeFilter = this.migrateData?.filter((item: any) => item['Tổng thời gian (Phút)'] >= this.mintime)
+    this.underMin = this.migrateData?.filter((item: any) => item['Tổng thời gian (Phút)'] < this.mintime)
+    this.underMin = this.underMin?.sort((a: any, b: any) => a['Tổng thời gian (Phút)'] < b['Tổng thời gian (Phút)'] ? 1 : -1)
+    timeFilter?.forEach((item: any, index: any) => {
+      const ids = item['Tên (Tên gốc)'].replaceAll(/[^\d.-]+/g, '|\/|')?.split('|\/|');
+      if (ids?.length > 0 && item['Tên (Tên gốc)']?.match(/\d+/)) {
+        const notEmptyIds = ids?.filter((notEmptyId: any) => notEmptyId)
+        if (notEmptyIds?.filter((nei: any) => nei?.toString()?.match(/\d+/))?.length >= 2) {
+          this.multipleNames.push(item)
+        }
+        const notStringIds = notEmptyIds?.filter((notStringId: any) => notStringId !== '.' || notStringId !== '-')
+        if (notStringIds?.length > 0) {
+          notStringIds?.forEach((validId: any) => {
+            if (validId) {
+              if (validId?.split('-')?.filter((nei: any) => nei?.toString()?.match(/\d+/))?.length >= 2) {
+                this.multipleNames.push(item)
+              }
+              validId?.split('-')?.forEach((minusValid: any) => {
+                if (minusValid) {
+                  if (minusValid?.split('.')?.filter((nei: any) => nei?.toString()?.match(/\d+/))?.length >= 2) {
+                    this.multipleNames.push(item)
+                  }
+                  minusValid?.split('.')?.forEach((dotValid: any) => {
+                    if (dotValid) {
+                      const foundStudent = this.studentSettings.find((st: any) => st?.id?.split('-')[st?.id?.split('-')?.length - 1]?.includes(dotValid))
+                      if (foundStudent?.id) {
+                        foundStudent.checkedIn = Date.now()
+                        foundStudent.checked = true
+                      }
+                    }
+                  })
+                }
+              })
+            }
+          })
+        }
+      } else {
+        this.inValidNames.push(item)
+      }
+      if (index === timeFilter?.length - 1) {
+        this.checkingIn = 'save'
+      }
+    })
+    this.logedCount = this.studentSettings?.filter((item: any) => item?.checkedIn)?.length
   }
 }
