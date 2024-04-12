@@ -230,6 +230,10 @@
           <mat-spinner></mat-spinner>
         </div>
         <div *ngIf="!studentSetingGetting">
+          <mat-form-field class="w-full">
+            <mat-label>Tìm kiếm</mat-label>
+            <input type="text" matInput #searchBox />
+          </mat-form-field>
           <table class="w-100" *ngIf="viewPortMode == 'desktop'">
             <thead class="z-10 border-b">
               <tr>
@@ -241,7 +245,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of studentSettings" [id]="item.id" [ngClass]="{ checkedIn: item.checkedIn > 0 }">
+              <tr *ngFor="let item of studentSettings | search: searchBox['value']" [id]="item.id" [ngClass]="{ checkedIn: item.checkedIn > 0 }">
                 <td>
                   <mat-checkbox [(ngModel)]="item.checked" (change)="onCheckIn(item)"></mat-checkbox>
                 </td>

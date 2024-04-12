@@ -26,45 +26,47 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { NgxMatTimepickerModule } from 'ngx-mat-timepicker';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SearchPipe } from "./diem-danh/search.pipe";
 
 
 @NgModule({
-  declarations: [
-    PhongTuyenSinhComponent,
-    DiemDanhComponent,
-    DashboardComponent
-  ],
-  imports: [
-    CommonModule,
-    PhongTuyenSinhRoutingModule,
-    MatSidenavModule,
-    MatListModule,
-    MatIconModule,
-    MatTooltipModule,
-    MatDialogModule,
-    MatSnackBarModule,
-    CpQrScannerModule,
-    MatMenuModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    FormsModule,
-    MatSelectModule,
-    MatExpansionModule,
-    MatGridListModule,
-    MatTableModule,
-    QRCodeModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    NgxMatTimepickerModule,
-    MatCheckboxModule
-  ],
-  providers: [
-    MatDatepickerModule,
-    {
-      provide: MAT_DATE_LOCALE, useValue: 'vi-VN'
-    }
-  ]
+    declarations: [
+        PhongTuyenSinhComponent,
+        DiemDanhComponent,
+        DashboardComponent
+    ],
+    providers: [
+        MatDatepickerModule,
+        {
+            provide: MAT_DATE_LOCALE, useValue: 'vi-VN'
+        }
+    ],
+    imports: [
+        CommonModule,
+        PhongTuyenSinhRoutingModule,
+        MatSidenavModule,
+        MatListModule,
+        MatIconModule,
+        MatTooltipModule,
+        MatDialogModule,
+        MatSnackBarModule,
+        CpQrScannerModule,
+        MatMenuModule,
+        MatButtonModule,
+        MatProgressSpinnerModule,
+        MatFormFieldModule,
+        MatInputModule,
+        FormsModule,
+        MatSelectModule,
+        MatExpansionModule,
+        MatGridListModule,
+        MatTableModule,
+        QRCodeModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        NgxMatTimepickerModule,
+        MatCheckboxModule,
+        SearchPipe
+    ]
 })
 export class PhongTuyenSinhModule { }
