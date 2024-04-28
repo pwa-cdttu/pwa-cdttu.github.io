@@ -38,6 +38,7 @@ export class DiemDanhComponent implements OnInit {
   checkInSession = <any>{}
   subjectList = <any>[]
   checkInTimeList = <any>[]
+  content: any = '2PACX-1vQZyO87S5mUmObY_eBC_EiaaTiy0Zj5XHiD_U-WJAcYZ8nXiEjHuLPIoooxacYi0FogXpPzo_ujeHCR'
 
   constructor(
     private _snackBar: MatSnackBar,
@@ -96,26 +97,26 @@ export class DiemDanhComponent implements OnInit {
   }
 
   getCheckInTimeList() {
+    const mergeWithLocalData = () => {
+      let localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
+      const currentSubject = localStorageAttendance.find((item: any) => item.subject == this.checkInSession.subject)
+      if (currentSubject) {
+        this.checkInTimeList = this.checkInTimeList.concat(Object.keys(currentSubject)?.filter((item: any) => item !== 'subject' && item !== 'name'))
+        if (this.checkInTimeList.length == 1) {
+          this.checkInSession['time'] = this.checkInTimeList[0]
+          this.getStudentSettings()
+        }
+      }
+    }
     try {
       this.checkInTimeList = []
       this.admissionsOfficeService.getSubjectTime(this.checkInSession['subject'])
         .subscribe((res: any) => {
           if (res.code == 200) {
             this.checkInTimeList = res.data;
-            if (this.checkInTimeList.length == 1) {
-              this.checkInSession['time'] = this.checkInTimeList[0]
-              this.getStudentSettings()
-            }
+            mergeWithLocalData()
           } else {
-            let localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
-            const currentSubject = localStorageAttendance.find((item: any) => item.subject == this.checkInSession.subject)
-            if (currentSubject) {
-              this.checkInTimeList = Object.keys(currentSubject)?.filter((item: any) => item !== 'subject' && item !== 'name')
-              if (this.checkInTimeList.length == 1) {
-                this.checkInSession['time'] = this.checkInTimeList[0]
-                this.getStudentSettings()
-              }
-            }
+            mergeWithLocalData()
           }
         })
     } catch (error) {
@@ -180,13 +181,14 @@ export class DiemDanhComponent implements OnInit {
       })
       this.journeyUser = null
       try {
-        const decodedToken = this.jwtHelper.decodeToken(this.qrData)
+        const decodedToken = this.qrData //this.jwtHelper.decodeToken(this.qrData)
         let userData: any;
-        try {
-          userData = JSON.parse(decodedToken)
-        } catch (e) {
-          userData = decodedToken
-        }
+        userData = this.studentSettings?.find((item: any) => item?.id == decodedToken)
+        // try {
+        //   userData = JSON.parse(decodedToken)
+        // } catch (e) {
+        //   userData = decodedToken
+        // }
         if (userData) {
           this.journeyUser = {
             id: userData.id,
@@ -250,6 +252,7 @@ export class DiemDanhComponent implements OnInit {
         const foundData = this.studentSettings.find((item: any) => item.id == this.journeyUser.id)
         const foundIndex = this.studentSettings.indexOf(foundData)
         this.studentSettings[foundIndex]['checkedIn'] = time || Date.now()
+        this.studentSettings[foundIndex]['checked'] = !!(time || Date.now())
         if (this.journeyUser.id && this.journeyUser.bi && this.journeyUser.na) {
           diemDanhWrapper.scroll({ top: scannedUser.offsetTop - 36 })
         }

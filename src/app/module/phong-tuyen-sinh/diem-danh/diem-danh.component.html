@@ -126,9 +126,9 @@
             <div *ngIf="continueMessage">
               <p [innerHTML]="continueMessage" class="whitespace-break-spaces mb-4"></p>
               <div class="flex justify-between">
-                <button mat-flat-button [color]="'primary'" (click)="onStartMigrate()"
-                  [disabled]="checkingIn == true">Bắt
-                  Đầu</button>
+                <button mat-flat-button [color]="'primary'" (click)="onStartMigrate()" [disabled]="checkingIn == true">
+                  Bắt Đầu
+                </button>
                 <mat-spinner *ngIf="checkingIn == true"></mat-spinner>
                 <button mat-flat-button [color]="'primary'" (click)="storeToLocalStorage(); checkingIn = false"
                   *ngIf="checkingIn == 'save'">
@@ -225,12 +225,12 @@
           </div>
         </mat-expansion-panel>
       </div>
-      <div class="attendance-table">
+      <div class="attendance-table relative">
         <div *ngIf="studentSetingGetting" class="d-flex justify-content-center">
           <mat-spinner></mat-spinner>
         </div>
         <div *ngIf="!studentSetingGetting">
-          <mat-form-field class="w-full">
+          <mat-form-field class="w-full sticky top-0 z-20 bg-white">
             <mat-label>Tìm kiếm</mat-label>
             <input type="text" matInput #searchBox />
           </mat-form-field>
@@ -245,7 +245,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of studentSettings | search: searchBox['value']" [id]="item.id" [ngClass]="{ checkedIn: item.checkedIn > 0 }">
+              <tr *ngFor="let item of studentSettings | search: searchBox['value']" [id]="item.id"
+                [ngClass]="{ checkedIn: item.checkedIn > 0 }">
                 <td>
                   <mat-checkbox [(ngModel)]="item.checked" (change)="onCheckIn(item)"></mat-checkbox>
                 </td>
@@ -353,48 +354,13 @@
           Hãy xem hướng dẫn thực hiện nếu bạn chưa biết cách làm nhé!
         </mat-panel-description>
       </mat-expansion-panel-header>
-      <div>
-        <h3>Hướng dẫn đồng bộ dữ liệu</h3>
-        <p>Sau khi ấn nút đồng bộ dữ liệu:</p>
-        <img src="/assets/img/guide/admissionOffice/click-sync-menu.png" alt="click-sync-menu" />
-        <p>
-          Hãy đợi trong giây lát để hệ thống hoạt động và tạo ra file excel đồng
-          bộ, quá trình này sẽ tốn vài giây cho đến tối đa là 1 phút.
-        </p>
-        <p>
-          Sau khi quá trình tạo file thành công. Hộp thoại yêu cầu lưu trữ sẽ
-          hiện lên, bạn cần lưu file đã tạo vào thư mục mà kỹ thuật viên đã chia
-          sẻ với bạn. <br />
-          Thư mục dùng để đồng bộ thường có dạn như ảnh dưới đây:
-        </p>
-        <img src="/assets/img/guide/admissionOffice/google-drive-folder.png" alt="click-sync-menu" />
-        <p>
-          Vị trí thường được chọn là:
-          <code>/CDTTU_SYSTEM/PWA/PHÒNG TUYỂN SINH/BAN CÔNG TÁC SINH VIÊN/</code>
-          <br />
-          Ấn chọn file có tên gần giống với tên file hệ thống đã tạo ra: <br />
-          <strong> Ví dụ: </strong> Nếu hệ thống tạo ra file
-          <code>admissionOffice(1).xlsx</code> Thì bạn chọn file
-          <code>admissionOffice.xlsx</code>
-        </p>
-        <img src="/assets/img/guide/admissionOffice/save.png" alt="click-sync-menu" />
-        <p>
-          Một hộp thoại yêu cầu chấp nhận lưu file sẽ hiện lên. bạn chọn
-          <strong>Yes</strong> để đồng ý.
-        </p>
-        <img src="/assets/img/guide/admissionOffice/confirm.png" alt="click-sync-menu" />
-        <p>
-          Sau khi đồng ý cho việc đồng bộ file (trong điều kiện có kết nối
-          mạng), file hệ thống vừa tạo ra sẽ đồng bộ với file được lưu trên
-          Google Drive. Vậy là quá trình đồng bộ đã hoàn thành.
-        </p>
-        <img src="/assets/img/guide/admissionOffice/confirm.png" alt="click-sync-menu" />
-        <p>
-          <strong>
-            Hãy kiểm tra lại kết quả đồng bộ của bạn trên file Google Drive sau
-            vài phút để dịch vụ đồng bộ của Google Drive làm việc nhé!
-          </strong>
-        </p>
+      <div class="w-full">
+        <iframe [src]="
+                'https://docs.google.com/document/d/e/' +
+                  content +
+                  '/pub?embedded=true' | safe
+              " frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen class="w-full h-full"
+          #googleDocContent></iframe>
       </div>
     </mat-expansion-panel>
     <div *ngIf="isSyncInProgress" class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
@@ -415,8 +381,9 @@
         <mat-selection-list #confirm>
           <mat-list-option>Đã lưu file mà hệ thống tạo ra với tên
             <code>admissionOffice.xlsx</code></mat-list-option>
-          <mat-list-option>Đã lưu file mà hệ thống tạo ra tại
-            <code>/CDTTU/CDTTU/CDU/PHÒNG TUYỂN SINH/BAN CÔNG TÁC SINH VIÊN/</code></mat-list-option>
+          <mat-list-option>Đã lưu file mà hệ thống tạo ra tại <strong>hãy đảm bảo file phải được thay thế file hiện
+              có</strong>
+            <code>/CDTTU_SYSTEM/PWA/PHÒNG TUYỂN SINH/BAN CÔNG TÁC SINH VIÊN/</code></mat-list-option>
         </mat-selection-list>
       </div>
     </mat-expansion-panel>

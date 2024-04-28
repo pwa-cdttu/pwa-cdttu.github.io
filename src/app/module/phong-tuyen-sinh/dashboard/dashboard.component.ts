@@ -107,7 +107,7 @@ export class DashboardComponent implements OnInit {
   }
 
   onExpand(element: any, $event: MouseEvent) {
-    element['qr'] = this.generaToken({ id: element.id, na: element.na, bi: element.bi })
+    element['qr'] = element.id
     setTimeout(() => {
       this.expandedElement =
         this.expandedElement === element ? null : element;

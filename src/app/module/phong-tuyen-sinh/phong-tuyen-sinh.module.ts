@@ -27,6 +27,7 @@ import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { NgxMatTimepickerModule } from 'ngx-mat-timepicker';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SearchPipe } from "./diem-danh/search.pipe";
+import { SharedModule } from "../../shared/shared.module";
 
 
 @NgModule({
@@ -66,7 +67,8 @@ import { SearchPipe } from "./diem-danh/search.pipe";
         MatNativeDateModule,
         NgxMatTimepickerModule,
         MatCheckboxModule,
-        SearchPipe
+        SearchPipe,
+        SharedModule
     ]
 })
 export class PhongTuyenSinhModule { }

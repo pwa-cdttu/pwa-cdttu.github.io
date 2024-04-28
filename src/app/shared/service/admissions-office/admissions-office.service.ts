@@ -138,13 +138,11 @@ export class AdmissionsOfficeService {
           reduce((cur, key) => { return Object.assign(cur, { [key]: new Date(subject[key]['v']).toString() != 'Invalid Date' ? subject[key]['v'] : subject[key]['w'] }) }, {})
         const subjectArray = Object.keys(objectKey).map((item: any) => {
           let dateValue = new Date(objectKey[item])
-          if (dateValue.toString() == 'Invalid Date') {
-            const date = objectKey[item].split(/(.\d{2}\/)/)[0]
-            const month = objectKey[item].split(/(.\d{2}\/)/)[1]?.replaceAll('/', '')
-            const year = objectKey[item].split(' ')[0].split('/')[objectKey[item].split(' ')[0].split('/')?.length - 1]
-            const time = objectKey[item].split(' ')[1]
-            dateValue = new Date(`${year}-${month}-${date} ${time}`)
-          }
+          const date = objectKey[item].split('/')[0]
+          const month = objectKey[item].split('/')[1]
+          const year = objectKey[item].split(' ')[0].split('/')[objectKey[item].split(' ')[0].split('/')?.length - 1]
+          const time = objectKey[item].split(' ')[1]
+          dateValue = new Date(`${year}-${month}-${date} ${time}`)
           return dateValue.toString() != 'Invalid Date' ? dateValue.getTime() : undefined;
         })?.filter((item: any) => !!item)
         response = {
@@ -313,7 +311,7 @@ export class AdmissionsOfficeService {
               const logTimes = Object.keys(foundSubject).filter((fj: any, index: any) => fj !== 'subject' && fj !== 'name')
               subjectRemoteData.forEach((std: any, index: any) => {
                 logTimes.forEach((lt: any) => {
-                  foundSubject[lt].forEach((fslt: any) => {
+                  foundSubject[lt].forEach((fslt: any) => {                    
                     const localFoundRemoteByid = subjectRemoteData.find((rs: any) => rs.id == fslt.id)
                     if (std.id && index === subjectRemoteData.indexOf(localFoundRemoteByid)) {
                       subjectRemoteData[subjectRemoteData.indexOf(localFoundRemoteByid)][lt] = fslt.checkedIn

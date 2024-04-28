@@ -19,7 +19,7 @@ export class SheetService {
         .then((req => {
           const workbook = read(req)
           const setting = workbook.Sheets['setting']
-          const column = [...new Set(Object.keys(setting).map((col: any) => setting[col.replace(/\d+((.|,)\d+)?/, '2')]['v']))]?.filter((col: any) => !!col)
+          const column = [...new Set(Object.keys(setting).map((col: any) => setting[col.replace(/\d+((.|,)\d+)?/, '2')]['v']))]
           const data = utils.sheet_to_json<any>(setting, {
             header: column
           })?.slice(2);

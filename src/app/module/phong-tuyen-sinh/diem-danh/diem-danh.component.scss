@@ -82,7 +82,7 @@
             }
             thead {
               position: sticky;
-              top: 0;
+              top: 78px;
               background-color: #ffffff;
             }
             tbody {
@@ -115,6 +115,18 @@
     background: #34a853;
     * {
       color: #ffffff;
+    }
+  }
+  .clock-face {
+    .mat-mdc-mini-fab:not(.mdc-fab--extended) {
+      box-shadow: none;
+      background: transparent;
+      *, &:hover * {
+        background: transparent !important;
+      }
+      &.mat-primary {
+        background-color: #3f51b5;
+      }
     }
   }
 }
