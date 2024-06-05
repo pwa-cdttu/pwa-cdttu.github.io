@@ -57,7 +57,7 @@ export class DashboardComponent implements OnInit {
     try {
       this.admissionsOfficeService.getStudentSettings()
         .subscribe((res: any) => {
-          if (res.code == 200) {
+          if (res.status == 200) {
             this.studentSettings = res.data
             this.dataSource = new MatTableDataSource(this.studentSettings)
           }

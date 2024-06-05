@@ -67,7 +67,7 @@ export class DiemDanhComponent implements OnInit {
     try {
       this.admissionsOfficeService.getSubject()
         .subscribe((res: any) => {
-          if (res.code == 200) {
+          if (res.status == 200) {
             this.subjectList = res.data;
             const localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')?.map((item: any) => {
               return {
@@ -108,12 +108,12 @@ export class DiemDanhComponent implements OnInit {
         }
       }
     }
-    try {
+    try {      
       this.checkInTimeList = []
       this.admissionsOfficeService.getSubjectTime(this.checkInSession['subject'])
         .subscribe((res: any) => {
-          if (res.code == 200) {
-            this.checkInTimeList = res.data;
+          if (res.status == 200) {
+            this.checkInTimeList = res.data.sort((a: any, b: any) => new Date(a) < new Date(b) ? 1 : -1);
             mergeWithLocalData()
           } else {
             mergeWithLocalData()
@@ -134,7 +134,7 @@ export class DiemDanhComponent implements OnInit {
       }
       this.admissionsOfficeService.getStudentSettings(request)
         .subscribe((res: any) => {
-          if (res.code == 200) {
+          if (res.status == 200) {
             this.studentSetingGetting = false
             let data = res.data
             const localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
@@ -162,7 +162,6 @@ export class DiemDanhComponent implements OnInit {
       console.error(error);
       this.studentSetingGetting = false
     }
-
   }
 
   scanComplete(qrData: any) {
@@ -394,8 +393,7 @@ export class DiemDanhComponent implements OnInit {
       })
     }
     if (this.addNew.type.key == 'time') {
-      const formatnewTime: any = this.datePipe.transform(this.addNew.key, `YYYY/MM/dd ${this.addNew.value}:00`)
-      const newTimeLog = new Date(formatnewTime).getTime()
+      const formatnewTime: any = this.datePipe.transform(this.addNew.key, `dd/MM/YYYY/ ${this.addNew.value}:00`)
       const currentSubject = localStorageAttendance.find((item: any) => item.subject == this.checkInSession.subject)
       if (!currentSubject) {
         localStorageAttendance.push({
@@ -404,11 +402,11 @@ export class DiemDanhComponent implements OnInit {
         localStorage.setItem('attendance', JSON.stringify(localStorageAttendance))
         localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
         const currentSubject = localStorageAttendance.find((item: any) => item.subject == this.checkInSession.subject)
-        localStorageAttendance[localStorageAttendance.indexOf(currentSubject)][newTimeLog] = []
+        localStorageAttendance[localStorageAttendance.indexOf(currentSubject)][formatnewTime] = []
       } else {
-        localStorageAttendance[localStorageAttendance.indexOf(currentSubject)][newTimeLog] = []
+        localStorageAttendance[localStorageAttendance.indexOf(currentSubject)][formatnewTime] = []
       }
-      this.checkInTimeList.push(newTimeLog)
+      this.checkInTimeList.push(formatnewTime)
     }
     localStorage.setItem('attendance', JSON.stringify(localStorageAttendance))
   }
@@ -435,7 +433,7 @@ export class DiemDanhComponent implements OnInit {
     try {
       this.admissionsOfficeService.migrateFromFile(event?.target?.files[0])
         .subscribe((res: any) => {
-          if (res.code === 200) {
+          if (res.status === 200) {
             this.isContinue = true
             this.migrateData = res.data
             this.continueMessage = `Đã lọc ra file có ${res.data?.length} dòng dữ liệu.\nHãy ấn bắt đầu để tiến hành cập nhật dữ liệu điểm danh.`
@@ -449,7 +447,7 @@ export class DiemDanhComponent implements OnInit {
     }
   }
 
-  mintime: number = 60;
+  mintime: number = 40;
   checkingIn: any = false
   inValidNames = <any>[]
   multipleNames = <any>[]

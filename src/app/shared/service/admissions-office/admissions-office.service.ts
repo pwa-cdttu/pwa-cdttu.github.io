@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, isDevMode } from '@angular/core';
 import { Observable, observable } from 'rxjs';
 import { read, utils } from 'xlsx';
 import { Workbook } from 'exceljs';
 import * as fs from 'file-saver';
 import { DatePipe } from '@angular/common';
+import { SheetService } from '../sheet/sheet.service';
 
 type Mutable<T> = { -readonly [P in keyof T]: T[P] }
 @Injectable({
@@ -13,8 +14,7 @@ export class AdmissionsOfficeService {
 
   readonly EXCEL_TYPE = 'application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet;charset=UTF-8';
   readonly EXCEL_EXTENSION = '.xlsx';
-  readonly sheetUrl = `https://docs.google.com/spreadsheets/d/e/{id}/pub?output=xlsx`
-  readonly sheetId = `2PACX-1vQbYcOhWEjk1qAFZ2BPunhuL-TWIFfuucgp423nWIXG8GqArdMoOC1BphgVyCbabA`
+  readonly sheetId = isDevMode() ? `2PACX-1vSuwMAAYOYwCQqbnNz-_fIb6EHBAmBG0J84jl_3wDPDz7V6sBuUm9iImBioeU8gGw` : `2PACX-1vQbYcOhWEjk1qAFZ2BPunhuL-TWIFfuucgp423nWIXG8GqArdMoOC1BphgVyCbabA`
   readonly admissionsOfficeWorbookName = 'admissionsOffice';
   readonly admissionsOfficeWorbook: any;
   readonly settingStudentSheet = 'settingStudent'
@@ -24,134 +24,107 @@ export class AdmissionsOfficeService {
   readonly settingStudentData = <any>[]
   isActiveAdmissionOffice: boolean = false;
 
-  constructor(private datePipe: DatePipe) {
-    this.fetchWorkbook()
+  constructor(
+    private datePipe: DatePipe,
+    private sheetService: SheetService
+  ) {
   }
 
-  fetchWorkbook() {
-    if (!this.admissionsOfficeWorbook) {
-      const ref: Mutable<this> = this;
-      const sheetUrl = this.sheetUrl.replace('{id}', this.sheetId)
-      fetch(sheetUrl)
-        .then((res: any) => res.arrayBuffer())
-        .then((req => {
-          const workbook = read(req)
-          ref.admissionsOfficeWorbook = workbook
-          this.isActiveAdmissionOffice = true
-        }))
-    }
-  }
-
-  getStudentSettings(request?: any): Observable<any> {
+  fetchAddmissionData(): Observable<any> {
+    const ref: Mutable<this> = this;
     return new Observable((observable) => {
-      let querySheet = this.settingStudentSheet
-      if (request?.subject && request?.time) {
-        querySheet = request.subject
-      }
-      let studentSetting = this.admissionsOfficeWorbook.Sheets[querySheet]
-      let data = this.decodeRawSheetData(studentSetting).filter((item: any) => !!item.id)
-      if (data?.length === 0) {
-        studentSetting = this.admissionsOfficeWorbook.Sheets[this.settingStudentSheet]
-        data = this.decodeRawSheetData(studentSetting).filter((item: any) => !!item.id)
-      }
-      if (request?.time) {
-        data = data.map((item: any) => {
-          let reponseObject = <any>{}
-          reponseObject['id'] = item.id
-          reponseObject['na'] = item.na
-          reponseObject['bi'] = item.bi
-          reponseObject['checkedIn'] = item[request.time]
-          reponseObject['checked'] = item[request.time] > 0 ? true : false
-          return reponseObject
-        })
-      }
-      if (!request?.subject && !request?.time) {
-        const ref: Mutable<this> = this;
-        ref.settingStudentData = data
-      }
-      const response = {
-        code: data?.length > 0 ? 200 : 404,
-        data: data
-      }
-      observable.next(response)
-      observable.complete()
-    })
-  }
-
-  private decodeRawSheetData(data: any, option?: any) {
-    if (!!data) {
-      const column = [...new Set(Object.keys(data).map((col: any) => {
-        let returnData = data[col.replace(/\d+((.|,)\d+)?/, (option?.row || '2'))]
-        if (returnData) {
-          if (!parseFloat(returnData['v'])) {
-            return returnData['v']
-          } else {
-            let dateValue = new Date(returnData['v'])
-            if (dateValue.toString() == 'Invalid Date') {
-              let date = returnData['v'].split(/(.\d{2}\/)/)[0]
-              if (option?.row) {
-                date = returnData['v'].split(new RegExp('/(.\d{' + option?.row + '}\/)/'))[0]
-              }
-              let month = returnData['v'].split(/(.\d{2}\/)/)[1]?.replaceAll('/', '')
-              if (option?.row) {
-                month = returnData['v'].split(new RegExp('/(.\d{' + option?.row + '}\/)/'))[1]?.replaceAll('/', '')
-              }
-              const year = returnData['v'].split(' ')[0].split('/')[returnData['v'].split(' ')[0].split('/')?.length - 1]
-              const time = returnData['v'].split(' ')[1]
-              dateValue = new Date(`${year}-${month}-${date} ${time}`)
-            }
-            return dateValue.getTime()
+      this.sheetService.fetchSheet(this.sheetId)
+        .subscribe((res: any) => {
+          if (res.status === 200) {
+            ref.admissionsOfficeWorbook = res.workbook;
+            observable.next({
+              status: 200,
+              data: ref.admissionsOfficeWorbook
+            })
           }
-        }
-      }))]?.filter((col: any) => !!col)
-      const responseData = utils.sheet_to_json<any>(data, {
-        header: option?.header || column
-      })?.slice(2);
-      return responseData
-    }
-    return []
+        })
+    });
   }
 
   getSubject(): Observable<any> {
+    const ref: Mutable<this> = this;
     return new Observable((observable) => {
-      const subjectSetting = this.admissionsOfficeWorbook.Sheets[this.settingSubjectSheet]
-      const data = this.decodeRawSheetData(subjectSetting)
-      const response = {
-        code: data?.length > 0 ? 200 : 404,
-        data: data.sort((a, b) => a.id > b.id ? 1 : -1)
+      if (this.admissionsOfficeWorbook) {
+        const sheet = this.admissionsOfficeWorbook.Sheets['settingSubject']
+        this.sheetService.decodeRawSheetData(sheet, 2)
+          .subscribe((res: any) => {
+            observable.next({
+              status: 200,
+              data: res
+            })
+          })
+      } else {
+        this.fetchAddmissionData().subscribe();
       }
-      observable.next(response)
-      observable.complete()
-    })
+    });
   }
 
   getSubjectTime(subjectId: any): Observable<any> {
     return new Observable((observable) => {
       const subject = this.admissionsOfficeWorbook.Sheets[subjectId]
       let response = {
-        code: 404,
+        status: 404,
         data: <any>[]
       }
       if (subject) {
         const objectKey = <any>Object.keys(subject).
           filter((key) => /^[a-zA-Z]*2[a-zA-Z\\s-]*$/.test(key)).
-          reduce((cur, key) => { return Object.assign(cur, { [key]: new Date(subject[key]['v']).toString() != 'Invalid Date' ? subject[key]['v'] : subject[key]['w'] }) }, {})
+          reduce((cur, key) => { return Object.assign(cur, { [key]: subject[key]['v'] }) }, {})
         const subjectArray = Object.keys(objectKey).map((item: any) => {
-          let dateValue = new Date(objectKey[item])
-          const date = objectKey[item].split('/')[0]
-          const month = objectKey[item].split('/')[1]
-          const year = objectKey[item].split(' ')[0].split('/')[objectKey[item].split(' ')[0].split('/')?.length - 1]
-          const time = objectKey[item].split(' ')[1]
-          dateValue = new Date(`${year}-${month}-${date} ${time}`)
-          return dateValue.toString() != 'Invalid Date' ? dateValue.getTime() : undefined;
+          if (Object.keys(this.settingStudentHeader).includes(objectKey[item])) {
+            return null
+          }
+          return objectKey[item];
         })?.filter((item: any) => !!item)
         response = {
-          code: subjectArray?.length > 0 ? 200 : 404,
+          status: subjectArray?.length > 0 ? 200 : 404,
           data: subjectArray
         }
       }
       observable.next(response)
       observable.complete()
+    })
+  }
+
+  getStudentSettings(request?: any): Observable<any> {
+    return new Observable((observable) => {
+      let querySheet = this.settingStudentSheet
+      if (request?.subject && request?.time) {
+        if (this.admissionsOfficeWorbook.SheetNames.includes(request?.subject)) {
+          querySheet = request.subject
+        }
+      }
+      let studentSetting = this.admissionsOfficeWorbook.Sheets[querySheet]
+      let data = <any>[];
+      this.sheetService.decodeRawSheetData(studentSetting, 2).subscribe((res: any) => {
+        data = res.filter((item: any) => !!item.id);
+        if (request?.time) {
+          data = data.map((item: any) => {
+            let reponseObject = <any>{}
+            reponseObject['id'] = item.id
+            reponseObject['na'] = item.na
+            reponseObject['bi'] = item.bi
+            reponseObject['checkedIn'] = item[request.time]
+            reponseObject['checked'] = item[request.time] > 0 ? true : false
+            return reponseObject
+          })
+        }
+        if (!request?.subject && !request?.time) {
+          const ref: Mutable<this> = this;
+          ref.settingStudentData = data
+        }
+        const response = {
+          status: data?.length > 0 ? 200 : 404,
+          data: data
+        }
+        observable.next(response)
+        observable.complete()
+      })
     })
   }
 
@@ -174,53 +147,56 @@ export class AdmissionsOfficeService {
         const headerRow = settingStudentSheet.addRow(keys.map((item: any) => this.settingStudentHeader[item]));
         const headerRowKey = settingStudentSheet.addRow(keys.map((item: any) => item));
         const studentSetting = this.admissionsOfficeWorbook.Sheets[this.settingStudentSheet]
-        const studentSettingData = this.decodeRawSheetData(studentSetting)
-        let config = keys.map(() => 0)
-        headerRow.eachCell((cell, number) => {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFFFFF' },
-            bgColor: { argb: 'FFFFFF' }
-          };
-          cell.border = {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' }
-          };
-          cell.font = {
-            bold: true
-          }
-        });
-        headerRowKey.eachCell((cell, number) => {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFFFFF' },
-            bgColor: { argb: 'FFFFFF' }
-          };
-          cell.border = {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' }
-          };
-          cell.font = {
-            bold: true
-          }
-        });
-        // Add Data and Conditional Formatting
-        studentSettingData.forEach(d => {
-          const rowHeys = Object.keys(d)
-          const dataRow = settingStudentSheet.addRow(rowHeys.map((key: any) => d[key]));
-          fitWidth(dataRow, config)
-        });
-        config.forEach((item, index) => {
-          settingStudentSheet.getColumn(index + 1).width = item;
-        });
-        settingStudentSheet.getRow(2).outlineLevel = 1
-        getSubjectSettingSheet()
+        let studentSettingData = <any>[]
+        this.sheetService.decodeRawSheetData(studentSetting, 2).subscribe((res: any) => {
+          studentSettingData = res
+          let config = keys.map(() => 0)
+          headerRow.eachCell((cell, number) => {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFFFFF' },
+              bgColor: { argb: 'FFFFFF' }
+            };
+            cell.border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' }
+            };
+            cell.font = {
+              bold: true
+            }
+          });
+          headerRowKey.eachCell((cell, number) => {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFFFFF' },
+              bgColor: { argb: 'FFFFFF' }
+            };
+            cell.border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' }
+            };
+            cell.font = {
+              bold: true
+            }
+          });
+          // Add Data and Conditional Formatting
+          studentSettingData.forEach((d: any) => {
+            const rowHeys = Object.keys(d)
+            const dataRow = settingStudentSheet.addRow(rowHeys.map((key: any) => d[key]));
+            fitWidth(dataRow, config)
+          });
+          config.forEach((item, index) => {
+            settingStudentSheet.getColumn(index + 1).width = item;
+          });
+          settingStudentSheet.getRow(2).outlineLevel = 1
+          getSubjectSettingSheet()
+        })
       }
       const settingSubjectSheet = admissionsOfficeExportedWorbook.addWorksheet(this.settingSubjectSheet);
       const getSubjectSettingSheet = () => {
@@ -230,66 +206,69 @@ export class AdmissionsOfficeService {
         const headerRow = settingSubjectSheet.addRow(keys.map((item: any) => this.settingSubjectHeader[item]));
         const headerRowKey = settingSubjectSheet.addRow(keys.map((item: any) => item));
         const subjectSetting = this.admissionsOfficeWorbook.Sheets[this.settingSubjectSheet]
-        let subjectSettingData = this.decodeRawSheetData(subjectSetting)
-        const localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
-        const mergeSubject = [...new Set(localStorageAttendance.map((item: any) => item.subject).concat(subjectSettingData.map((item: any) => item.id)))]
-        subjectSettingData = mergeSubject.map((item: any) => {
-          let returnMergeSubject = <any>{}
-          if (subjectSettingData.find((ss: any) => ss.id == item)) {
-            returnMergeSubject = subjectSettingData.find((ss: any) => ss.id == item)
-          } else {
-            const foundLocal = localStorageAttendance.find((la: any) => la.subject == item)
-            returnMergeSubject['id'] = item
-            returnMergeSubject['na'] = foundLocal.name
-          }
-          return returnMergeSubject
+        let subjectSettingData = <any>[];
+        this.sheetService.decodeRawSheetData(subjectSetting, 2).subscribe((res: any) => {
+          subjectSettingData = res;
+          const localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
+          const mergeSubject = [...new Set(localStorageAttendance.map((item: any) => item.subject).concat(subjectSettingData.map((item: any) => item.id)))]
+          subjectSettingData = mergeSubject.map((item: any) => {
+            let returnMergeSubject = <any>{}
+            if (subjectSettingData.find((ss: any) => ss.id == item)) {
+              returnMergeSubject = subjectSettingData.find((ss: any) => ss.id == item)
+            } else {
+              const foundLocal = localStorageAttendance.find((la: any) => la.subject == item)
+              returnMergeSubject['id'] = item
+              returnMergeSubject['na'] = foundLocal.name
+            }
+            return returnMergeSubject
+          })
+          let config = keys.map(() => 0)
+          headerRow.eachCell((cell, number) => {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFFFFF' },
+              bgColor: { argb: 'FFFFFF' }
+            };
+            cell.border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' }
+            };
+            cell.font = {
+              bold: true
+            }
+          });
+          headerRowKey.eachCell((cell, number) => {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFFFFF' },
+              bgColor: { argb: 'FFFFFF' }
+            };
+            cell.border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' }
+            };
+            cell.font = {
+              bold: true
+            }
+          });
+          // Add Data and Conditional Formatting
+          subjectSettingData.forEach((d: any) => {
+            const rowHeys = Object.keys(d)
+            const dataRow = settingSubjectSheet.addRow(rowHeys.map((key: any) => d[key]));
+            fitWidth(dataRow, config)
+          });
+          config.forEach((item, index) => {
+            settingSubjectSheet.getColumn(index + 1).width = item;
+          });
+          settingSubjectSheet.getRow(2).outlineLevel = 1
+          getAttendanceSheets()
         })
-        let config = keys.map(() => 0)
-        headerRow.eachCell((cell, number) => {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFFFFF' },
-            bgColor: { argb: 'FFFFFF' }
-          };
-          cell.border = {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' }
-          };
-          cell.font = {
-            bold: true
-          }
-        });
-        headerRowKey.eachCell((cell, number) => {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFFFFF' },
-            bgColor: { argb: 'FFFFFF' }
-          };
-          cell.border = {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' }
-          };
-          cell.font = {
-            bold: true
-          }
-        });
-        // Add Data and Conditional Formatting
-        subjectSettingData.forEach(d => {
-          const rowHeys = Object.keys(d)
-          const dataRow = settingSubjectSheet.addRow(rowHeys.map((key: any) => d[key]));
-          fitWidth(dataRow, config)
-        });
-        config.forEach((item, index) => {
-          settingSubjectSheet.getColumn(index + 1).width = item;
-        });
-        settingSubjectSheet.getRow(2).outlineLevel = 1
-        getAttendanceSheets()
       }
       const getAttendanceSheets = () => {
         const remoteSubjects = this.admissionsOfficeWorbook.SheetNames?.filter((item: any) => !item.includes('setting'))
@@ -311,7 +290,7 @@ export class AdmissionsOfficeService {
               const logTimes = Object.keys(foundSubject).filter((fj: any, index: any) => fj !== 'subject' && fj !== 'name')
               subjectRemoteData.forEach((std: any, index: any) => {
                 logTimes.forEach((lt: any) => {
-                  foundSubject[lt].forEach((fslt: any) => {                    
+                  foundSubject[lt].forEach((fslt: any) => {
                     const localFoundRemoteByid = subjectRemoteData.find((rs: any) => rs.id == fslt.id)
                     if (std.id && index === subjectRemoteData.indexOf(localFoundRemoteByid)) {
                       subjectRemoteData[subjectRemoteData.indexOf(localFoundRemoteByid)][lt] = fslt.checkedIn
@@ -328,12 +307,15 @@ export class AdmissionsOfficeService {
               let remoteKeys = Object.keys(subjectRemoteData[0])?.map((srk: any) => srk).filter((srk: any) => !!srk)
               let rowKeys = <any>[]
               if (subjectRemote) {
-
                 const currentSubject = localStorageAttendance.find((lcs: any) => lcs.subject == ms)
                 if (currentSubject) {
                   remoteKeys = [...new Set(remoteKeys = remoteKeys.concat(Object.keys(currentSubject).filter((csok: any) => csok !== 'subject' && csok !== 'name').map((fcsok: any) => {
                     return fcsok
                   })?.filter((item: any) => !!item)))]
+                  rowKeys = [...new Set(remoteKeys.map((item: any) => {
+                    return item
+                  }))]
+                } else {
                   rowKeys = [...new Set(remoteKeys.map((item: any) => {
                     return item
                   }))]
@@ -350,10 +332,10 @@ export class AdmissionsOfficeService {
                 }
               }
               remoteKeys = remoteKeys.map((rmks: any) => {
-                return new Date(parseInt(rmks)).toString() == 'Invalid Date' ? rmks : this.datePipe.transform(new Date(parseInt(rmks)), 'dd/MM/YYYY HH:mm:ss')
+                return new Date(rmks).toString() == 'Invalid Date' ? rmks : this.datePipe.transform(new Date(rmks), 'dd/MM/YYYY HH:mm:ss')
               })
               rowKeys = rowKeys.map((rmks: any) => {
-                return new Date(parseInt(rmks)).toString() == 'Invalid Date' ? rmks : this.datePipe.transform(new Date(parseInt(rmks)), 'dd/MM/YYYY HH:mm:ss')
+                return new Date(rmks).toString() == 'Invalid Date' ? rmks : this.datePipe.transform(new Date(rmks), 'dd/MM/YYYY HH:mm:ss')
               })
               const subjectHeaderRow = saveLogTimeSheet.addRow(remoteKeys);
               const subjectHeaderRowKey = saveLogTimeSheet.addRow(remoteKeys.map((item: any) => this.settingStudentHeader[item]?.name ? this.settingStudentHeader[item]?.name : item));
@@ -403,6 +385,9 @@ export class AdmissionsOfficeService {
                     d['co'] += 1
                   }
                 })
+                rowKeys?.filter((k: any) => !Object.keys(this.settingStudentHeader).includes(k))?.forEach((k: any) => {
+                  d[k] = Math.floor(d[k]);
+                })
                 const dataRow = saveLogTimeSheet.addRow(rowKeys.map((key: any) => d[key]));
                 fitWidth(dataRow, config)
               })
@@ -438,8 +423,11 @@ export class AdmissionsOfficeService {
             }
           }
           if (subjectRemote) {
-            subjectRemoteData = this.decodeRawSheetData(subjectRemote)
-            handleLocalData()
+            subjectRemoteData = <any>[]
+            this.sheetService.decodeRawSheetData(subjectRemote, 2).subscribe((res: any) => {
+              subjectRemoteData = res;
+              handleLocalData()
+            })
           } else {
             this.getStudentSettings().subscribe()
             subjectRemoteData = this.settingStudentData.map((item: any) => {
@@ -476,14 +464,18 @@ export class AdmissionsOfficeService {
           type: 'binary'
         })
         const rawData = workbook?.Sheets[workbook?.SheetNames[0]]
-        const data = this.decodeRawSheetData(rawData, { row: 1 })
-        if (data?.length > 0) {
-          observable.next({
-            code: data?.length > 0 ? 200 : 404,
-            data: data,
+        let data = <any>[]
+        this.sheetService.decodeRawSheetData(rawData)
+          .subscribe((res: any) => {
+            data = res
+            if (data?.length > 0) {
+              observable.next({
+                status: data?.length > 0 ? 200 : 404,
+                data: data,
+              })
+              observable.complete()
+            }
           })
-          observable.complete()
-        }
       }
       reader.onerror = (ex) => {
         console.log(ex);

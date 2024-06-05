@@ -69,7 +69,7 @@
               {{
               !!checkInSession.time
               ? "Đã chọn " +
-              (checkInSession.time | date : "dd/MM/YYYY HH:mm:ss")
+              (checkInSession.time)
               : "Ấn chọn thời gian bắt đầu cho phiên điểm danh này"
               }}
             </mat-panel-description>
@@ -80,10 +80,7 @@
                 (click)="onUpdateCheckInSession({ time: item })"
                 [ngClass]="{ selected: checkInSession['time'] == item }">
                 <mat-grid-tile-header>{{ item }}</mat-grid-tile-header>
-                <span class="checked-in-setting-data">Ngày {{ item | date : "dd" }} tháng
-                  {{ item | date : "MM" }} năm {{ item | date : "YYYY" }}
-                  {{ item | date : "HH" }} giờ {{ item | date : "mm" }} phút
-                </span>
+                <span class="checked-in-setting-data">{{item}}</span>
               </mat-grid-tile>
               <mat-grid-tile class="checked-in-setting-wrapper cursor-pointer"
                 (click)="onUpdateCheckInSession({ time: 'addNew' })">
@@ -123,7 +120,7 @@
                 <input type="number" matInput [(ngModel)]="mintime" />
               </mat-form-field>
             </div>
-            <div *ngIf="continueMessage">
+            <div *ngIf="continueMessage" class="select-text">
               <p [innerHTML]="continueMessage" class="whitespace-break-spaces mb-4"></p>
               <div class="flex justify-between">
                 <button mat-flat-button [color]="'primary'" (click)="onStartMigrate()" [disabled]="checkingIn == true">

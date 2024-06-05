@@ -80,17 +80,16 @@ export class FullLayoutComponent implements OnInit {
       return;
     }
     this.swUpdate.versionUpdates.subscribe((event: any) => {
-      console.log(`current`, event.current, `available`, event.available);
-      if (
-        confirm(
-          'Phiên bản mới đã sẵn sàng, hãy đồng ý để cập nhật phiên bản mới ngay!!'
-        )
-      ) {
-        this.swUpdate.activateUpdate().then(() => location.reload());
+      if (event.current != event.available) {
+        console.log(`current`, event.current, `available`, event.available);
+        if (
+          confirm(
+            'Phiên bản mới đã sẵn sàng, hãy đồng ý để cập nhật phiên bản mới ngay!!'
+          )
+        ) {
+          this.swUpdate.activateUpdate().then(() => location.reload());
+        }
       }
-    });
-    this.swUpdate.versionUpdates.subscribe((event: any) => {
-      console.log(`current`, event.previous, `available`, event.current);
     });
   }
 

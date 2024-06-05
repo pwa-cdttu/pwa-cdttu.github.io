@@ -8,7 +8,7 @@ import { ViewMissionService } from 'src/app/shared/service/view-mission/view-mis
   templateUrl: './phong-tuyen-sinh.component.html',
   styleUrls: ['./phong-tuyen-sinh.component.scss']
 })
-export class PhongTuyenSinhComponent implements OnInit, AfterViewChecked {
+export class PhongTuyenSinhComponent implements OnInit {
   menu = [
     {
       key: 'diem-danh',
@@ -19,17 +19,13 @@ export class PhongTuyenSinhComponent implements OnInit, AfterViewChecked {
     }
   ]
   viewPortMode: any;
-  isActiveAdmissionOffice: boolean = false;
+  addmissionWorkbook: any;;
 
   constructor(
     public viewMissionService: ViewMissionService,
     private breakpointObserver: BreakpointObserver,
     public admissionsOfficeService: AdmissionsOfficeService
   ) {
-  }
-
-  ngAfterViewChecked(): void {
-    this.isActiveAdmissionOffice = this.admissionsOfficeService.isActiveAdmissionOffice
   }
 
   ngOnInit(): void {
@@ -50,6 +46,7 @@ export class PhongTuyenSinhComponent implements OnInit, AfterViewChecked {
           }
         }
       });
+    this.fetchAddmissionData();
   }
 
   onToggleDrawer() {
@@ -58,5 +55,19 @@ export class PhongTuyenSinhComponent implements OnInit, AfterViewChecked {
         !this.viewMissionService.isDrawerOpened;
       localStorage.setItem('layout', JSON.stringify({ isDrawerOpened: this.viewMissionService.isDrawerOpened }))
     }
+  }
+
+  fetchAddmissionData() {
+    this.admissionsOfficeService.fetchAddmissionData().subscribe({
+      next: (res: any) => {
+        this.addmissionWorkbook = res.data
+      },
+      error(err) {
+          console.log(err);          
+      },
+      complete: () => {
+        console.info('complete');
+      }
+    })
   }
 }
