@@ -393,7 +393,7 @@ export class DiemDanhComponent implements OnInit {
       })
     }
     if (this.addNew.type.key == 'time') {
-      const formatnewTime: any = this.datePipe.transform(this.addNew.key, `dd/MM/YYYY/ ${this.addNew.value}:00`)
+      const formatnewTime: any = this.datePipe.transform(this.addNew.key, `dd/MM/YYYY ${this.addNew.value}:00`)
       const currentSubject = localStorageAttendance.find((item: any) => item.subject == this.checkInSession.subject)
       if (!currentSubject) {
         localStorageAttendance.push({
