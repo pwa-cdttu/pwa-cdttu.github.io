@@ -15,7 +15,7 @@ export class SheetService {
       const column = [...new Set(Object.keys(data).map((col: any) => {
         let returnData = data[col.replace(/\d+((.|,)\d+)?/, slice)]
         if (returnData) {
-          return returnData['w']
+          return returnData['w'] || returnData['v']
         }
       }))]?.filter((col: any) => !!col)
       const responseData = utils.sheet_to_json<any>(data, {
