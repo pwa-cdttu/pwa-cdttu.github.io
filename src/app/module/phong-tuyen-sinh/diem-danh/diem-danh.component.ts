@@ -113,7 +113,7 @@ export class DiemDanhComponent implements OnInit {
       this.admissionsOfficeService.getSubjectTime(this.checkInSession['subject'])
         .subscribe((res: any) => {
           if (res.status == 200) {
-            this.checkInTimeList = res.data.sort((a: any, b: any) => new Date(a) < new Date(b) ? 1 : -1);
+            this.checkInTimeList = res.data.sort((a: any, b: any) => new Date(a) < new Date(b) ? 1 : -1);      
             mergeWithLocalData()
           } else {
             mergeWithLocalData()
@@ -307,7 +307,7 @@ export class DiemDanhComponent implements OnInit {
         this.getStudentSettings()
       } else {
         this.addNew.type = { key: 'time', name: 'thời gian học' }
-        this.addNew.key = this.datePipe.transform(new Date(), 'dd/MM/YYYY')
+        this.addNew.key = this.datePipe.transform(new Date(), 'YYYY-MM-dd')
         this.addNew.value = this.datePipe.transform(new Date(), 'HH:mm')
         this.matDialog.open(this.addNewDialog, { disableClose: true })
       }
@@ -326,7 +326,7 @@ export class DiemDanhComponent implements OnInit {
               const foundAttendance = foundSubject[this.checkInSession['time']]
               if (foundAttendance?.length > 0) {
                 data.forEach((item: any) => {
-                  item[`${this.datePipe.transform(this.checkInSession.time, 'dd/MM/YYYY HH:mm:ss')}`] = foundAttendance.find((fa: any) => fa.id == item.id)?.checkedIn || 0
+                  item[`${this.datePipe.transform(this.checkInSession.time, 'YYYY-MM-dd HH:mm:ss')}`] = foundAttendance.find((fa: any) => fa.id == item.id)?.checkedIn || 0
                 })
                 const header = <any>{}
                 header.id = 'Mã học viên'
@@ -336,7 +336,7 @@ export class DiemDanhComponent implements OnInit {
                 keys.id = 'id'
                 keys.na = 'na'
                 keys.bi = 'bi'
-                keys[`${this.datePipe.transform(this.checkInSession.time, 'dd/MM/YYYY HH:mm:ss')}`] = `${this.datePipe.transform(this.checkInSession.time, 'dd/MM/YYYY HH:mm:ss')}`
+                keys[`${this.datePipe.transform(this.checkInSession.time, 'YYYY-MM-dd HH:mm:ss')}`] = `${this.datePipe.transform(this.checkInSession.time, 'YYYY-MM-dd HH:mm:ss')}`
                 data.unshift(keys)
                 data.unshift(header)
               }
@@ -393,9 +393,7 @@ export class DiemDanhComponent implements OnInit {
       })
     }
     if (this.addNew.type.key == 'time') {
-      const formatnewTime: any = this.datePipe.transform(this.addNew.key, `dd/MM/YYYY ${this.addNew.value}:00`)
-      console.log(formatnewTime);
-      
+      const formatnewTime: any = this.datePipe.transform(this.addNew.key, `YYYY-MM-dd ${this.addNew.value}:00`)      
       const currentSubject = localStorageAttendance.find((item: any) => item.subject == this.checkInSession.subject)
       if (!currentSubject) {
         localStorageAttendance.push({

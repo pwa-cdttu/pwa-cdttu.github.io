@@ -14,8 +14,8 @@ export class AdmissionsOfficeService {
 
   readonly EXCEL_TYPE = 'application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet;charset=UTF-8';
   readonly EXCEL_EXTENSION = '.xlsx';
-  readonly sheetId = `2PACX-1vQbYcOhWEjk1qAFZ2BPunhuL-TWIFfuucgp423nWIXG8GqArdMoOC1BphgVyCbabA`
-  // readonly sheetId = isDevMode() ? `2PACX-1vSuwMAAYOYwCQqbnNz-_fIb6EHBAmBG0J84jl_3wDPDz7V6sBuUm9iImBioeU8gGw` : `2PACX-1vQbYcOhWEjk1qAFZ2BPunhuL-TWIFfuucgp423nWIXG8GqArdMoOC1BphgVyCbabA`
+  // readonly sheetId = `2PACX-1vQbYcOhWEjk1qAFZ2BPunhuL-TWIFfuucgp423nWIXG8GqArdMoOC1BphgVyCbabA`
+  readonly sheetId = isDevMode() ? `2PACX-1vSuwMAAYOYwCQqbnNz-_fIb6EHBAmBG0J84jl_3wDPDz7V6sBuUm9iImBioeU8gGw` : `2PACX-1vQbYcOhWEjk1qAFZ2BPunhuL-TWIFfuucgp423nWIXG8GqArdMoOC1BphgVyCbabA`
   readonly admissionsOfficeWorbookName = 'admissionsOffice';
   readonly admissionsOfficeWorbook: any;
   readonly settingStudentSheet = 'settingStudent'
@@ -397,7 +397,7 @@ export class AdmissionsOfficeService {
               });
               saveLogTimeSheet.getRow(2).outlineLevel = 1
               saveLogTimeSheet.addConditionalFormatting({
-                ref: 'E3:Z1000',
+                ref: 'E3:ZY1000',
                 rules: [
                   {
                     priority: 1,

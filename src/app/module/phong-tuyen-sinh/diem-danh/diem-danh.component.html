@@ -69,7 +69,7 @@
               {{
               !!checkInSession.time
               ? "Đã chọn " +
-              (checkInSession.time | date: 'dd/MM/YYYY HH:mm:ss')
+              (checkInSession.time ? (checkInSession.time | date: 'dd/MM/YYYY HH:mm:ss') : '')
               : "Ấn chọn thời gian bắt đầu cho phiên điểm danh này"
               }}
             </mat-panel-description>
@@ -80,7 +80,8 @@
                 (click)="onUpdateCheckInSession({ time: item })"
                 [ngClass]="{ selected: checkInSession['time'] == item }">
                 <mat-grid-tile-header>{{ item }}</mat-grid-tile-header>
-                <span class="checked-in-setting-data">{{item | date: 'dd/MM/YYYY HH:mm:ss'}}</span>
+                <span class="checked-in-setting-data">{{item ? (item | date: 'dd/MM/YYYY HH:mm:ss') : ''}}</span>
+                <!-- <span class="checked-in-setting-data">{{item ? (item) : ''}}</span> -->
               </mat-grid-tile>
               <mat-grid-tile class="checked-in-setting-wrapper cursor-pointer"
                 (click)="onUpdateCheckInSession({ time: 'addNew' })">
