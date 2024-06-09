@@ -74,7 +74,7 @@ export class AdmissionsOfficeService {
       if (subject) {
         const objectKey = <any>Object.keys(subject).
           filter((key) => /^[a-zA-Z]*2[a-zA-Z\\s-]*$/.test(key)).
-          reduce((cur, key) => { return Object.assign(cur, { [key]: subject[key]['v'] }) }, {})
+          reduce((cur, key) => { return Object.assign(cur, { [key]: subject[key]['w'] }) }, {})
         const subjectArray = Object.keys(objectKey).map((item: any) => {
           if (Object.keys(this.settingStudentHeader).includes(objectKey[item])) {
             return null
