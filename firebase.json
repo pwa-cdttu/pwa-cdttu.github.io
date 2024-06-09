@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist/cdttu.github.io",
+    "public": "dist/cdttu.github.io/browser",
     "ignore": [
       "firebase.json",
       "**/.*",

@@ -52,6 +52,7 @@
           },
           "configurations": {
             "production": {
+              "outputPath": "dist/cdttu.github.io",
               "budgets": [
                 {
                   "type": "initial",
