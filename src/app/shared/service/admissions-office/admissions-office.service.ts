@@ -332,10 +332,10 @@ export class AdmissionsOfficeService {
                 }
               }
               remoteKeys = remoteKeys.map((rmks: any) => {
-                return new Date(rmks).toString() == 'Invalid Date' ? rmks : this.datePipe.transform(new Date(rmks), 'dd/MM/YYYY HH:mm:ss')
+                return rmks // new Date(rmks).toString() == 'Invalid Date' ? rmks : this.datePipe.transform(new Date(rmks), 'dd/MM/YYYY HH:mm:ss')
               })
               rowKeys = rowKeys.map((rmks: any) => {
-                return new Date(rmks).toString() == 'Invalid Date' ? rmks : this.datePipe.transform(new Date(rmks), 'dd/MM/YYYY HH:mm:ss')
+                return rmks // new Date(rmks).toString() == 'Invalid Date' ? rmks : this.datePipe.transform(new Date(rmks), 'dd/MM/YYYY HH:mm:ss')
               })
               const subjectHeaderRow = saveLogTimeSheet.addRow(remoteKeys);
               const subjectHeaderRowKey = saveLogTimeSheet.addRow(remoteKeys.map((item: any) => this.settingStudentHeader[item]?.name ? this.settingStudentHeader[item]?.name : item));
