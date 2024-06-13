@@ -40,6 +40,7 @@
     "ngx-mat-timepicker": "^15.1.7",
     "ngx-scanner-qrcode": "^1.6.9",
     "path": "^0.12.7",
+    "qrcode": "^1.5.3",
     "rxjs": "~7.4.0",
     "tslib": "^2.6.3",
     "web-push": "^3.6.7",
