@@ -6,6 +6,8 @@ import * as CryptoJS from 'crypto-js';
 import { NgxCaptureService } from 'ngx-capture';
 import { tap } from 'rxjs';
 import { MatTableDataSource } from '@angular/material/table';
+import QRCode from 'qrcode'
+
 
 @Component({
   selector: 'app-dashboard',
@@ -108,6 +110,15 @@ export class DashboardComponent implements OnInit {
 
   onExpand(element: any, $event: MouseEvent) {
     element['qr'] = element.id
+    QRCode.toDataURL(element['qr'])
+      .then(url => {
+        element['qrSrc'] = url;
+        console.log(element['qrSrc'])
+      })
+      .catch(err => {
+        console.error(err)
+      })
+    
     setTimeout(() => {
       this.expandedElement =
         this.expandedElement === element ? null : element;
