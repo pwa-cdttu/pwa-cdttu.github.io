@@ -338,8 +338,8 @@ export class AdmissionsOfficeService {
               rowKeys = rowKeys.map((rmks: any) => {
                 return rmks
               })
-              const subjectHeaderRow = saveLogTimeSheet.addRow(remoteKeys);
-              const subjectHeaderRowKey = saveLogTimeSheet.addRow(remoteKeys.map((item: any) => this.settingStudentHeader[item]?.name ? this.settingStudentHeader[item]?.name : item));
+              const subjectHeaderRow = saveLogTimeSheet.addRow(remoteKeys.map((item: any) => this.settingStudentHeader[item] ? this.settingStudentHeader[item] : `'${this.datePipe.transform(new Date(item), "dd/MM/yyyy HH:mm:ss")}`));
+              const subjectHeaderRowKey = saveLogTimeSheet.addRow(remoteKeys);
               let config = remoteKeys.map(() => 20)
               subjectHeaderRow.eachCell((cell, number) => {
                 cell.fill = {
