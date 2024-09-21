@@ -15,9 +15,11 @@ export class AdmissionsOfficeService {
   readonly EXCEL_TYPE = 'application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet;charset=UTF-8';
   readonly EXCEL_EXTENSION = '.xlsx';
   // readonly sheetId = `2PACX-1vQbYcOhWEjk1qAFZ2BPunhuL-TWIFfuucgp423nWIXG8GqArdMoOC1BphgVyCbabA`
-  readonly sheetId = isDevMode() ? `2PACX-1vSuwMAAYOYwCQqbnNz-_fIb6EHBAmBG0J84jl_3wDPDz7V6sBuUm9iImBioeU8gGw` : `2PACX-1vQbYcOhWEjk1qAFZ2BPunhuL-TWIFfuucgp423nWIXG8GqArdMoOC1BphgVyCbabA`
+  readonly classSettingSheetId = `2PACX-1vQ7YBD5oAGowXeukJLQROSw74KmbZt7r8NxDRNM6VRCgeCTqZbeI9fbgya86yYEQGQ4Y0gJasT6R7ej`
   readonly admissionsOfficeWorbookName = 'admissionsOffice';
+  readonly classSettingWorbookName = 'CLASS_SETTING';
   readonly admissionsOfficeWorbook: any;
+  readonly classSettingWorbook: any;
   readonly settingStudentSheet = 'settingStudent'
   readonly settingStudentHeader = <any>{ id: 'Mã học viên', na: 'Họ và Tên', bi: 'Năm sinh', co: 'Tổng cộng' }
   readonly settingSubjectSheet = 'settingSubject'
@@ -31,28 +33,28 @@ export class AdmissionsOfficeService {
   ) {
   }
 
-  fetchAddmissionData(): Observable<any> {
+  fetchClassSetting() {
     const ref: Mutable<this> = this;
     return new Observable((observable) => {
-      this.sheetService.fetchSheet(this.sheetId)
+      this.sheetService.fetchSheet(this.classSettingSheetId)
         .subscribe((res: any) => {
           if (res.status === 200) {
-            ref.admissionsOfficeWorbook = res.workbook;
+            ref.classSettingWorbook = res.workbook;
             observable.next({
               status: 200,
-              data: ref.admissionsOfficeWorbook
+              data: ref.classSettingWorbook
             })
           }
         })
     });
   }
 
-  getSubject(): Observable<any> {
+  getClassSetting() {
     const ref: Mutable<this> = this;
     return new Observable((observable) => {
-      if (this.admissionsOfficeWorbook) {
-        const sheet = this.admissionsOfficeWorbook.Sheets['settingSubject']
-        this.sheetService.decodeRawSheetData(sheet, 2)
+      if (this.classSettingWorbook) {
+        const sheet = this.classSettingWorbook.Sheets[this.classSettingWorbookName]
+        this.sheetService.decodeRawSheetData(sheet, 1)
           .subscribe((res: any) => {
             observable.next({
               status: 200,
@@ -60,8 +62,28 @@ export class AdmissionsOfficeService {
             })
           })
       } else {
-        this.fetchAddmissionData().subscribe();
+        this.fetchClassSetting().subscribe();
       }
+    });
+  }
+
+  getSubject(sheetId: any): Observable<any> {
+    const ref: Mutable<this> = this;
+    return new Observable((observable) => {
+      this.sheetService.fetchSheet(sheetId)
+        .subscribe((workbookRes: any) => {
+          if (workbookRes.status === 200) {
+            ref.admissionsOfficeWorbook = workbookRes.workbook;
+            const sheet = this.admissionsOfficeWorbook.Sheets['settingSubject']
+              this.sheetService.decodeRawSheetData(sheet, 2)
+                .subscribe((res: any) => {
+                  observable.next({
+                    status: 200,
+                    data: res
+                  })
+                })
+          }
+        })
     });
   }
 

@@ -29,7 +29,7 @@
     </mat-nav-list>
   </mat-drawer>
   <mat-drawer-content>
-    <div class="loading" *ngIf="!addmissionWorkbook">
+    <div class="loading" *ngIf="!classSettingWorkbook">
       <div class="animation">
         <mat-icon
           [ngStyle]="{
@@ -49,7 +49,7 @@
         </div>
       </div>
     </div>
-    <ng-container *ngIf="addmissionWorkbook">
+    <ng-container *ngIf="classSettingWorkbook">
       <router-outlet></router-outlet>
     </ng-container>
   </mat-drawer-content>

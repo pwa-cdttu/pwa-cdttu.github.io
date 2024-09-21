@@ -29,7 +29,15 @@
       <div class="attendance-control overflow-auto" [ngClass]="{
           'sticky-mode': checkInSession.subject && checkInSession.time
         }">
-        <mat-expansion-panel class="w-100" [expanded]="!checkInSession.time">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Chọn lớp</mat-label>
+          <mat-select [(ngModel)]="selectedClass" (ngModelChange)="getSubject()">
+            <mat-option *ngFor="let classObject of classSetting" [value]="classObject">{{classObject?.key}} -
+              {{classObject?.name}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-progress-bar *ngIf="gettingData" mode="indeterminate"></mat-progress-bar>
+        <mat-expansion-panel *ngIf="selectedClass?.sheet" class="w-100" [expanded]="!checkInSession.time">
           <mat-expansion-panel-header [ngClass]="{ selected: !!checkInSession['subject'] }">
             <mat-panel-title> Môn học </mat-panel-title>
             <mat-panel-description>
@@ -353,12 +361,6 @@
         </mat-panel-description>
       </mat-expansion-panel-header>
       <div class="w-full">
-        <iframe [src]="
-                'https://docs.google.com/document/d/e/' +
-                  content +
-                  '/pub?embedded=true' | safe
-              " frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen class="w-full h-full"
-          #googleDocContent></iframe>
       </div>
     </mat-expansion-panel>
     <div *ngIf="isSyncInProgress" class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
@@ -370,6 +372,13 @@
     <mat-expansion-panel [expanded]="isSyncCheck" [disabled]="true">
       <mat-expansion-panel-header>Kiểm tra lại thao tác đồng bộ</mat-expansion-panel-header>
       <div>
+        <p>
+          TRUY CẬP <a [href]="selectedClass.drivePath | safe" target="_blank" class="font-bold text-red-600 text-4xl underline">[LIÊN
+            KẾT NÀY]</a> ĐỂ DI
+          CHUYỂN ĐẾN THƯ MỤC LƯU DANH SÁCH
+          ĐIỂM
+          DANH CỦA LỚP <strong>{{selectedClass.name}}({{selectedClass.key}})</strong>
+        </p>
         <h3>Hãy kiểm tra lại thao tác đồng bộ bạn đã làm đúng hay chưa nhé!</h3>
         <p>
           Hãy đảm bảo rằng bạn đã làm đúng như

@@ -29,6 +29,7 @@ export class DiemDanhComponent implements OnInit {
   studentSetingGetting: boolean = false
   isSyncInProgress: boolean = false
   isSyncCheck: boolean = false
+  gettingData: boolean = false
   timeout = 3000
   viewPortMode: any;
   jwtHelper = new JwtHelperService()
@@ -38,6 +39,8 @@ export class DiemDanhComponent implements OnInit {
   checkInSession = <any>{}
   subjectList = <any>[]
   checkInTimeList = <any>[]
+  classSetting = <any>[]
+  selectedClass: any
   content: any = '2PACX-1vQZyO87S5mUmObY_eBC_EiaaTiy0Zj5XHiD_U-WJAcYZ8nXiEjHuLPIoooxacYi0FogXpPzo_ujeHCR'
 
   constructor(
@@ -60,16 +63,37 @@ export class DiemDanhComponent implements OnInit {
           this.viewPortMode = 'desktop';
         }
       });
-    this.getSubject()
+    this.getClassSetting()
+  }
+
+  getClassSetting() {
+    this.admissionsOfficeService.getClassSetting()
+      .subscribe({
+        next: (res: any) => {
+          if (res.status === 200) {
+            this.classSetting = res.data
+          }
+        },
+        error: (err: any) => {
+          console.log(err);
+        },
+        complete: () => {
+          console.info('complete')
+        }
+      })
   }
 
   getSubject() {
+    this.gettingData = true
     try {
-      this.admissionsOfficeService.getSubject()
-        .subscribe((res: any) => {
+      this.subjectList = <any>[]
+      this.checkInTimeList = <any>[]
+      this.admissionsOfficeService.getSubject(this.selectedClass?.sheet)
+        .subscribe((res: any) => {  
+          this.gettingData = false        
           if (res.status == 200) {
-            this.subjectList = res.data;
-            const localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')?.map((item: any) => {
+            this.subjectList = res.data;            
+            const localStorageAttendance = JSON.parse(localStorage.getItem(this.selectedClass?.key) || '[]')?.map((item: any) => {
               return {
                 id: item?.subject,
                 na: item?.name
@@ -93,12 +117,13 @@ export class DiemDanhComponent implements OnInit {
         })
     } catch (error) {
       console.error(error);
+      this.gettingData = false
     }
   }
 
   getCheckInTimeList() {
     const mergeWithLocalData = () => {
-      let localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
+      let localStorageAttendance = JSON.parse(localStorage.getItem(this.selectedClass?.key) || '[]')
       const currentSubject = localStorageAttendance.find((item: any) => item.subject == this.checkInSession.subject)
       if (currentSubject) {
         this.checkInTimeList = this.checkInTimeList.concat(Object.keys(currentSubject)?.filter((item: any) => item !== 'subject' && item !== 'name'))
@@ -108,12 +133,12 @@ export class DiemDanhComponent implements OnInit {
         }
       }
     }
-    try {      
+    try {
       this.checkInTimeList = []
       this.admissionsOfficeService.getSubjectTime(this.checkInSession['subject'])
         .subscribe((res: any) => {
           if (res.status == 200) {
-            this.checkInTimeList = res.data.sort((a: any, b: any) => new Date(a) < new Date(b) ? 1 : -1);      
+            this.checkInTimeList = res.data.sort((a: any, b: any) => new Date(a) < new Date(b) ? 1 : -1);
             mergeWithLocalData()
           } else {
             mergeWithLocalData()
@@ -137,7 +162,7 @@ export class DiemDanhComponent implements OnInit {
           if (res.status == 200) {
             this.studentSetingGetting = false
             let data = res.data
-            const localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
+            const localStorageAttendance = JSON.parse(localStorage.getItem(this.selectedClass?.key) || '[]')
             const foundSubject = localStorageAttendance.find((item: any) => item.subject == this.checkInSession['subject'])
             if (foundSubject) {
               const foundAttendance = foundSubject[this.checkInSession['time']]
@@ -151,7 +176,7 @@ export class DiemDanhComponent implements OnInit {
                 })
               }
             }
-            this.studentSettings = data           
+            this.studentSettings = data
             this.count = {
               checkedIn: this.studentSettings?.filter((item: any) => item?.checkedIn > 0)?.length,
               total: this.studentSettings?.length
@@ -261,7 +286,7 @@ export class DiemDanhComponent implements OnInit {
   }
 
   storeToLocalStorage() {
-    let localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
+    let localStorageAttendance = JSON.parse(localStorage.getItem(this.selectedClass?.key) || '[]')
     const foundSubject = localStorageAttendance?.find((item: any) => item['subject'] === this.checkInSession.subject)
     let savedObject = <any>{}
     if (foundSubject) {
@@ -271,7 +296,7 @@ export class DiemDanhComponent implements OnInit {
       savedObject[this.checkInSession.time] = this.studentSettings?.filter((item: any) => item.checkedIn > 0).map((item: any) => { return { id: item.id, checkedIn: item.checkedIn } })
       localStorageAttendance.push(savedObject)
     }
-    localStorage.setItem('attendance', JSON.stringify(localStorageAttendance))
+    localStorage.setItem(this.selectedClass?.key, JSON.stringify(localStorageAttendance))
     this.count = {
       checkedIn: this.studentSettings?.filter((item: any) => item?.checkedIn > 0)?.length,
       total: this.studentSettings?.length
@@ -283,7 +308,7 @@ export class DiemDanhComponent implements OnInit {
   }
 
   confirmDelete() {
-    localStorage.removeItem('attendance')
+    localStorage.removeItem(this.selectedClass?.key)
     this.getSubject()
     this.getCheckInTimeList()
     this.getStudentSettings()
@@ -320,7 +345,7 @@ export class DiemDanhComponent implements OnInit {
         .subscribe((res: any) => {
           if (res.code == 200) {
             let data = res.data
-            const localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
+            const localStorageAttendance = JSON.parse(localStorage.getItem(this.selectedClass?.key) || '[]')
             const foundSubject = localStorageAttendance.find((item: any) => item.subject == this.checkInSession['subject'])
             if (foundSubject) {
               const foundAttendance = foundSubject[this.checkInSession['time']]
@@ -381,7 +406,7 @@ export class DiemDanhComponent implements OnInit {
   }
 
   storeNewSubject() {
-    let localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
+    let localStorageAttendance = JSON.parse(localStorage.getItem(this.selectedClass?.key) || '[]')
     if (this.addNew.type.key == 'subject') {
       this.subjectList.push({
         id: this.addNew.key,
@@ -393,14 +418,14 @@ export class DiemDanhComponent implements OnInit {
       })
     }
     if (this.addNew.type.key == 'time') {
-      const formatnewTime: any = this.datePipe.transform(this.addNew.key, `YYYY-MM-dd ${this.addNew.value}:00`)      
+      const formatnewTime: any = this.datePipe.transform(this.addNew.key, `YYYY-MM-dd ${this.addNew.value}:00`)
       const currentSubject = localStorageAttendance.find((item: any) => item.subject == this.checkInSession.subject)
       if (!currentSubject) {
         localStorageAttendance.push({
           subject: this.checkInSession.subject
         })
-        localStorage.setItem('attendance', JSON.stringify(localStorageAttendance))
-        localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
+        localStorage.setItem(this.selectedClass?.key, JSON.stringify(localStorageAttendance))
+        localStorageAttendance = JSON.parse(localStorage.getItem(this.selectedClass?.key) || '[]')
         const currentSubject = localStorageAttendance.find((item: any) => item.subject == this.checkInSession.subject)
         localStorageAttendance[localStorageAttendance.indexOf(currentSubject)][formatnewTime] = []
       } else {
@@ -408,7 +433,7 @@ export class DiemDanhComponent implements OnInit {
       }
       this.checkInTimeList.push(formatnewTime)
     }
-    localStorage.setItem('attendance', JSON.stringify(localStorageAttendance))
+    localStorage.setItem(this.selectedClass?.key, JSON.stringify(localStorageAttendance))
   }
 
   onCheckIn(item: any, time?: any) {

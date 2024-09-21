@@ -28,6 +28,7 @@ import { NgxMatTimepickerModule } from 'ngx-mat-timepicker';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SearchPipe } from "./diem-danh/search.pipe";
 import { SharedModule } from "../../shared/shared.module";
+import {MatProgressBarModule} from '@angular/material/progress-bar';
 
 
 @NgModule({
@@ -68,7 +69,8 @@ import { SharedModule } from "../../shared/shared.module";
         NgxMatTimepickerModule,
         MatCheckboxModule,
         SearchPipe,
-        SharedModule
+        SharedModule,
+        MatProgressBarModule
     ]
 })
 export class PhongTuyenSinhModule { }

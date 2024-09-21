@@ -19,7 +19,7 @@ export class PhongTuyenSinhComponent implements OnInit {
     }
   ]
   viewPortMode: any;
-  addmissionWorkbook: any;;
+  classSettingWorkbook: any;;
 
   constructor(
     public viewMissionService: ViewMissionService,
@@ -46,7 +46,7 @@ export class PhongTuyenSinhComponent implements OnInit {
           }
         }
       });
-    this.fetchAddmissionData();
+    this.fetchClassSetting();
   }
 
   onToggleDrawer() {
@@ -57,10 +57,10 @@ export class PhongTuyenSinhComponent implements OnInit {
     }
   }
 
-  fetchAddmissionData() {
-    this.admissionsOfficeService.fetchAddmissionData().subscribe({
+  fetchClassSetting() {
+    this.admissionsOfficeService.fetchClassSetting().subscribe({
       next: (res: any) => {
-        this.addmissionWorkbook = res.data
+        this.classSettingWorkbook = res.data
       },
       error(err) {
           console.log(err);          
