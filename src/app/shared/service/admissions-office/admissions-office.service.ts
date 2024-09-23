@@ -151,7 +151,7 @@ export class AdmissionsOfficeService {
     })
   }
 
-  syncData(): Observable<any> {
+  syncData(classKey: any): Observable<any> {
     return new Observable((observable) => {
       const admissionsOfficeExportedWorbook = new Workbook();
       const fitWidth = (data: any, config: any) => {
@@ -232,7 +232,7 @@ export class AdmissionsOfficeService {
         let subjectSettingData = <any>[];
         this.sheetService.decodeRawSheetData(subjectSetting, 2).subscribe((res: any) => {
           subjectSettingData = res;
-          const localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
+          const localStorageAttendance = JSON.parse(localStorage.getItem(classKey) || '[]')
           const mergeSubject = [...new Set(localStorageAttendance.map((item: any) => item.subject).concat(subjectSettingData.map((item: any) => item.id)))]
           subjectSettingData = mergeSubject.map((item: any) => {
             let returnMergeSubject = <any>{}
@@ -295,7 +295,7 @@ export class AdmissionsOfficeService {
       }
       const getAttendanceSheets = () => {
         const remoteSubjects = this.admissionsOfficeWorbook.SheetNames?.filter((item: any) => !item.includes('setting'))
-        const localStorageAttendance = JSON.parse(localStorage.getItem('attendance') || '[]')
+        const localStorageAttendance = JSON.parse(localStorage.getItem(classKey) || '[]')
         const mergeSubjects = [...new Set(localStorageAttendance.map((lsa: any) => lsa.subject).concat(remoteSubjects))]
         mergeSubjects.forEach((ms: any) => {
           let saveLogTimeSheet = admissionsOfficeExportedWorbook.addWorksheet(ms);

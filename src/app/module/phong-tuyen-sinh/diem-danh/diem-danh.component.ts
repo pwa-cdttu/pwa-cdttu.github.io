@@ -391,7 +391,7 @@ export class DiemDanhComponent implements OnInit {
   syncData() {
     this.isSyncInProgress = true
     try {
-      this.admissionsOfficeService.syncData()
+      this.admissionsOfficeService.syncData(this.selectedClass?.key)
         .subscribe((res: any) => {
           if (res.code === 200) {
             this.isSyncInProgress = false
