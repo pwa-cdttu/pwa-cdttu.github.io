@@ -89,10 +89,10 @@ export class DiemDanhComponent implements OnInit {
       this.subjectList = <any>[]
       this.checkInTimeList = <any>[]
       this.admissionsOfficeService.getSubject(this.selectedClass?.sheet)
-        .subscribe((res: any) => {  
-          this.gettingData = false        
+        .subscribe((res: any) => {
+          this.gettingData = false
           if (res.status == 200) {
-            this.subjectList = res.data;            
+            this.subjectList = res.data;
             const localStorageAttendance = JSON.parse(localStorage.getItem(this.selectedClass?.key) || '[]')?.map((item: any) => {
               return {
                 id: item?.subject,
@@ -478,17 +478,45 @@ export class DiemDanhComponent implements OnInit {
   multipleNames = <any>[]
   underMin = <any>[]
   logedCount = 0
+  totalDurationKey = ''
+  nameKey = ''
   onStartMigrate() {
     this.logedCount = 0
     this.inValidNames = []
     this.multipleNames = []
     this.checkingIn = true;
-    const timeFilter = this.migrateData?.filter((item: any) => item['Tổng thời gian (Phút)'] >= this.mintime)
-    this.underMin = this.migrateData?.filter((item: any) => item['Tổng thời gian (Phút)'] < this.mintime)
-    this.underMin = this.underMin?.sort((a: any, b: any) => a['Tổng thời gian (Phút)'] < b['Tổng thời gian (Phút)'] ? 1 : -1)
+    let tableHead = Object.keys(this.migrateData[0])
+    const idShouldIncludes = this.classSetting?.map((item: any) => item?.key?.split('K')[0])
+    // get first 5 rows,
+    // if first 5 row's value include only number: Total Duration
+    // if first 5 row's value include text and number: Name
+    for (let index = 0; index < 6; index++) {
+      tableHead?.forEach((th: any) => {
+        const value = this.migrateData[index][th]
+        if (th) {
+          if (value?.match(
+            /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          )) {
+            // TODO collect email address
+          } else {
+            const minitues = parseInt(value)
+            if (minitues.toString() !== 'NaN') {
+              this.totalDurationKey = th
+            } else {              
+              if (value && (value?.includes(' ') || value?.includes('.') || value?.includes('-') || value?.includes('_')) && value?.replaceAll(/[^\d.-]+/g, '|\/|')?.split('|\/|')?.length > 0) {
+                this.nameKey = th
+              }
+            }
+          }
+        }
+      })
+    }    
+    const timeFilter = this.migrateData?.filter((item: any) => item[this.totalDurationKey] >= this.mintime)
+    this.underMin = this.migrateData?.filter((item: any) => item[this.totalDurationKey] < this.mintime)
+    this.underMin = this.underMin?.sort((a: any, b: any) => a[this.totalDurationKey] < b[this.totalDurationKey] ? 1 : -1)
     timeFilter?.forEach((item: any, index: any) => {
-      const ids = item['Tên (Tên gốc)'].replaceAll(/[^\d.-]+/g, '|\/|')?.split('|\/|');
-      if (ids?.length > 0 && item['Tên (Tên gốc)']?.match(/\d+/)) {
+      const ids = item[this.nameKey]?.replaceAll(/[^\d.-]+/g, '|\/|')?.split('|\/|');
+      if (ids?.length > 0 && item[this.nameKey]?.match(/\d+/)) {        
         const notEmptyIds = ids?.filter((notEmptyId: any) => notEmptyId)
         if (notEmptyIds?.filter((nei: any) => nei?.toString()?.match(/\d+/))?.length >= 2) {
           this.multipleNames.push(item)
