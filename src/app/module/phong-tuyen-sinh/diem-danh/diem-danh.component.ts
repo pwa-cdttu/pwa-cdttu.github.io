@@ -490,10 +490,10 @@ export class DiemDanhComponent implements OnInit {
     // get first 5 rows,
     // if first 5 row's value include only number: Total Duration
     // if first 5 row's value include text and number: Name
-    for (let index = 0; index < 6; index++) {
+    for (let index = 0; index < 10; index++) {
       tableHead?.forEach((th: any) => {
         const value = this.migrateData[index][th]
-        if (th) {
+        if (value) {       
           if (value?.match(
             /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
           )) {
@@ -503,7 +503,7 @@ export class DiemDanhComponent implements OnInit {
             if (minitues.toString() !== 'NaN') {
               this.totalDurationKey = th
             } else {              
-              if (value && (value?.includes(' ') || value?.includes('.') || value?.includes('-') || value?.includes('_')) && value?.replaceAll(/[^\d.-]+/g, '|\/|')?.split('|\/|')?.length > 0) {
+              if (!!value && /\d+/.test(value)) {
                 this.nameKey = th
               }
             }
